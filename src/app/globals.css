@@ -3,19 +3,154 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --lm-bg: #05080f;
+  --lm-panel: #0a1220;
+  --lm-panel-2: #0d1829;
+  --lm-border: #1a2d4a;
+  --lm-cyan: #2ee6ff;
+  --lm-amber: #f5b942;
+  --lm-green: #3dff9a;
+  --lm-red: #ff4d6a;
+  --lm-text: #d7e6f7;
+  --lm-muted: #7f98b3;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--lm-text);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(46, 230, 255, 0.08), transparent 55%),
+    radial-gradient(900px 500px at 90% 0%, rgba(245, 185, 66, 0.06), transparent 50%),
+    linear-gradient(180deg, #05080f 0%, #070d18 50%, #05080f 100%);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* scanline overlay */
+.lm-scanlines::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 3px
+  );
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+}
+
+.lm-grid {
+  background-image:
+    linear-gradient(rgba(46, 230, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46, 230, 255, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.lm-panel {
+  background: linear-gradient(180deg, rgba(13, 24, 41, 0.92), rgba(10, 18, 32, 0.96));
+  border: 1px solid var(--lm-border);
+  box-shadow:
+    0 0 0 1px rgba(46, 230, 255, 0.04) inset,
+    0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.lm-glow {
+  text-shadow: 0 0 12px rgba(46, 230, 255, 0.45);
+}
+
+.lm-btn {
+  @apply inline-flex items-center justify-center gap-2 rounded px-3 py-2 text-sm font-medium transition;
+  border: 1px solid rgba(46, 230, 255, 0.35);
+  background: linear-gradient(180deg, rgba(46, 230, 255, 0.16), rgba(46, 230, 255, 0.05));
+  color: var(--lm-cyan);
+}
+
+.lm-btn:hover {
+  border-color: rgba(46, 230, 255, 0.7);
+  background: linear-gradient(180deg, rgba(46, 230, 255, 0.28), rgba(46, 230, 255, 0.1));
+}
+
+.lm-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lm-btn-amber {
+  border-color: rgba(245, 185, 66, 0.4);
+  background: linear-gradient(180deg, rgba(245, 185, 66, 0.18), rgba(245, 185, 66, 0.05));
+  color: var(--lm-amber);
+}
+
+.lm-input {
+  @apply w-full rounded px-3 py-2 text-sm outline-none;
+  background: rgba(5, 12, 22, 0.9);
+  border: 1px solid var(--lm-border);
+  color: var(--lm-text);
+}
+
+.lm-input:focus {
+  border-color: rgba(46, 230, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(46, 230, 255, 0.12);
+}
+
+.lm-badge {
+  @apply inline-flex items-center rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider;
+  border: 1px solid var(--lm-border);
+  color: var(--lm-muted);
+}
+
+.lm-badge-live {
+  border-color: rgba(61, 255, 154, 0.4);
+  color: var(--lm-green);
+  background: rgba(61, 255, 154, 0.08);
+}
+
+.lm-badge-warn {
+  border-color: rgba(245, 185, 66, 0.4);
+  color: var(--lm-amber);
+  background: rgba(245, 185, 66, 0.08);
+}
+
+.lm-badge-crit {
+  border-color: rgba(255, 77, 106, 0.45);
+  color: var(--lm-red);
+  background: rgba(255, 77, 106, 0.08);
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #1a2d4a;
+  border-radius: 4px;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.lm-pulse {
+  animation: pulse-dot 1.6s ease-in-out infinite;
 }
