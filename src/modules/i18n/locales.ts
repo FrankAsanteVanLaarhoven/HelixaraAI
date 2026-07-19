@@ -36,6 +36,7 @@ export type MessageKey =
   | "nav.osint"
   | "nav.agents"
   | "nav.kanban"
+  | "nav.telemetry"
   | "nav.globe"
   | "nav.audit"
   | "nav.capabilities"
@@ -116,6 +117,7 @@ const en: Catalog = {
   "nav.osint": "OSINT",
   "nav.agents": "Agents",
   "nav.kanban": "Kanban Team",
+  "nav.telemetry": "Telemetry Map",
   "nav.globe": "Geospatial",
   "nav.audit": "Audit",
   "nav.capabilities": "Capabilities",
