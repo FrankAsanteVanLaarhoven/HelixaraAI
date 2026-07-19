@@ -4,30 +4,48 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MetricCard } from "@/components/console/MetricCard";
 import { GlobeCanvas } from "@/components/console/GlobeCanvas";
-import { ArrowRight, Bot, Eye, FileSearch, ScrollText } from "lucide-react";
+import {
+  ArrowRight,
+  Bot,
+  CloudSun,
+  Cpu,
+  Eye,
+  FileSearch,
+  Newspaper,
+  ScrollText,
+  Zap,
+} from "lucide-react";
+import { useI18n } from "@/modules/i18n/context";
 
 type GeoSnap = {
-  layers: { points: { id: string; lat: number; lon: number; label: string; kind: string }[] }[];
+  layers: {
+    points: { id: string; lat: number; lon: number; label: string; kind: string }[];
+  }[];
+  entityCount?: number;
   generatedAt: string;
 };
 
 export default function ConsoleHome() {
+  const { t } = useI18n();
   const [health, setHealth] = useState<Record<string, unknown> | null>(null);
   const [geo, setGeo] = useState<GeoSnap | null>(null);
   const [auditCount, setAuditCount] = useState(0);
   const [missions, setMissions] = useState(0);
+  const [events, setEvents] = useState(0);
 
   useEffect(() => {
     Promise.all([
       fetch("/api/v1/health").then((r) => r.json()),
       fetch("/api/v1/geospatial").then((r) => r.json()),
       fetch("/api/v1/audit?limit=50").then((r) => r.json()),
-      fetch("/api/v1/missions").then((r) => r.json()),
-    ]).then(([h, g, a, m]) => {
+      fetch("/api/v1/hermes").then((r) => r.json()),
+      fetch("/api/v1/events?limit=5").then((r) => r.json()),
+    ]).then(([h, g, a, m, e]) => {
       setHealth(h);
       setGeo(g);
       setAuditCount(a.count || a.events?.length || 0);
-      setMissions(m.missions?.length || 0);
+      setMissions(m.runs?.length || 0);
+      setEvents(e.stats?.total || e.events?.length || 0);
     });
   }, []);
 
@@ -41,28 +59,41 @@ export default function ConsoleHome() {
             Mission Control
           </div>
           <h1 className="text-2xl font-semibold text-[var(--lm-text)]">
-            Command Overview
+            {t("console.title")}
           </h1>
-          <p className="mt-1 text-sm text-[var(--lm-muted)]">
-            Unified dashboard for stealth crawl, OSINT fusion, agent missions, and
-            geospatial situational awareness.
-          </p>
+          <p className="mt-1 text-sm text-[var(--lm-muted)]">{t("console.subtitle")}</p>
         </div>
         <div className="lm-badge lm-badge-live">
-          {health ? "API ONLINE" : "CONNECTING…"}
+          {health ? t("status.online") : t("common.loading")}
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard label="Service" value="HelixaraAI" hint="v0.1.0 · self-hosted" tone="cyan" />
-        <MetricCard label="Missions" value={missions} hint="agent pipelines" tone="amber" />
-        <MetricCard label="Audit events" value={auditCount} hint="session + disk" tone="green" />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <MetricCard
-          label="Geo layers"
-          value={geo?.layers.length ?? "—"}
-          hint="live demo feeds"
+          label={t("console.metrics.service")}
+          value="HelixaraAI"
+          hint="v0.2 · :3007"
           tone="cyan"
         />
+        <MetricCard
+          label={t("console.metrics.missions")}
+          value={missions}
+          hint="Hermes runs"
+          tone="amber"
+        />
+        <MetricCard
+          label={t("console.metrics.audit")}
+          value={auditCount}
+          hint="chain of custody"
+          tone="green"
+        />
+        <MetricCard
+          label={t("console.metrics.layers")}
+          value={geo?.entityCount ?? points.length}
+          hint="live fusion"
+          tone="cyan"
+        />
+        <MetricCard label="Events" value={events} hint="bus buffer" tone="amber" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-5">
@@ -73,33 +104,57 @@ export default function ConsoleHome() {
         <div className="space-y-3 lg:col-span-2">
           <div className="lm-panel rounded-lg p-4">
             <div className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[var(--lm-muted)]">
-              Quick actions
+              {t("console.quick")}
             </div>
             <div className="space-y-2">
               {[
                 {
                   href: "/console/scrape",
                   icon: Eye,
-                  title: "Launch stealth scrape",
-                  desc: "Surface or deep crawl with ROE checks",
-                },
-                {
-                  href: "/console/osint",
-                  icon: FileSearch,
-                  title: "Run OSINT enrichment",
-                  desc: "DNS · CT · headers · gated dark-web",
+                  title: t("nav.scrape"),
+                  desc: t("home.card.scrape.desc"),
                 },
                 {
                   href: "/console/missions",
                   icon: Bot,
-                  title: "Start agent mission",
-                  desc: "Multi-role recon → report",
+                  title: t("nav.agents"),
+                  desc: t("home.card.agents.desc"),
+                },
+                {
+                  href: "/console/events",
+                  icon: Zap,
+                  title: t("nav.events"),
+                  desc: t("events.desc"),
+                },
+                {
+                  href: "/console/intelligence",
+                  icon: Newspaper,
+                  title: t("nav.intelligence"),
+                  desc: t("intel.desc"),
+                },
+                {
+                  href: "/console/weather",
+                  icon: CloudSun,
+                  title: t("nav.weather"),
+                  desc: t("weather.desc"),
+                },
+                {
+                  href: "/console/quantum",
+                  icon: Cpu,
+                  title: t("nav.quantum"),
+                  desc: t("quantum.desc"),
+                },
+                {
+                  href: "/console/osint",
+                  icon: FileSearch,
+                  title: t("nav.osint"),
+                  desc: t("home.card.osint.desc"),
                 },
                 {
                   href: "/console/audit",
                   icon: ScrollText,
-                  title: "Review audit trail",
-                  desc: "Chain-of-custody for operators",
+                  title: t("nav.audit"),
+                  desc: t("audit.desc"),
                 },
               ].map((a) => (
                 <Link
@@ -110,7 +165,9 @@ export default function ConsoleHome() {
                   <a.icon className="h-4 w-4 shrink-0 text-cyan-300" />
                   <div className="min-w-0 flex-1">
                     <div className="text-sm text-[var(--lm-text)]">{a.title}</div>
-                    <div className="text-[11px] text-[var(--lm-muted)]">{a.desc}</div>
+                    <div className="truncate text-[11px] text-[var(--lm-muted)]">
+                      {a.desc}
+                    </div>
                   </div>
                   <ArrowRight className="h-3.5 w-3.5 text-[var(--lm-muted)]" />
                 </Link>
@@ -120,14 +177,9 @@ export default function ConsoleHome() {
 
           <div className="lm-panel rounded-lg p-4 text-sm text-[var(--lm-muted)]">
             <div className="mb-2 text-[10px] uppercase tracking-[0.2em] text-cyan-300/80">
-              Market position
+              SOTA modular stack
             </div>
-            Surpasses single-purpose scrapers by shipping{" "}
-            <span className="text-[var(--lm-text)]">sovereignty</span>,{" "}
-            <span className="text-[var(--lm-text)]">stealth profiles</span>,{" "}
-            <span className="text-[var(--lm-text)]">agent missions</span>, and{" "}
-            <span className="text-[var(--lm-text)]">geospatial fusion</span> with
-            mandatory ethics locks — the stack enterprise SOCs actually need.
+            {t("console.market")}
           </div>
         </div>
       </div>

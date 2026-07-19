@@ -1,8 +1,10 @@
 # HelixaraAI
 
-**Sovereign OSINT · Stealth Crawl · Mission Command**
+**Sovereign OSINT · Stealth Crawl · Mission Command · Live Earth**
 
-Self-hosted cybersecurity command console for **authorized** operators: ethical OSINT, military-grade stealth web crawling, agentic recon missions, geospatial situational awareness, and immutable audit/ROE controls.
+Self-hosted **modular** cybersecurity command console for **authorized** operators: ethical OSINT, stealth crawl, Hermes + OpenClaw agents (Llama 3.1 / ChatGPT training), live public SSA/ADS-B, digital twins, quantum hybrids, full-site i18n (20 languages), weather/FX/news/alerts, and immutable audit/ROE controls.
+
+**Port:** `3007` · **Version:** `0.2.0`
 
 > **Authorized use only.** HelixaraAI is designed for lawful OSINT, defensive threat intel, and security testing under a documented Rules of Engagement. It does **not** ship exploit generators, default wireless attack tooling, or criminal dark-web automation.
 
@@ -31,28 +33,51 @@ npm run dev
 
 Repo: [github.com/FrankAsanteVanLaarhoven/HelixaraAI](https://github.com/FrankAsanteVanLaarhoven/HelixaraAI)
 
-Open [http://localhost:3000](http://localhost:3000) → **Enter Command Console**.
+**Default port: `3007`** (reserved so HelixaraAI stays clear of other local apps on 3000–3006).
+
+Open [http://localhost:3007](http://localhost:3007) → **Enter Command Console**.
 
 ### Production build
 
 ```bash
 npm run build
-npm start
+npm start   # also binds :3007
 ```
 
 ---
 
-## Modules (MVP)
+## Modules (v0.2 modular)
 
 | Module | Path | Status |
 |--------|------|--------|
 | Command overview | `/console` | Live |
-| Stealth Crawl Engine | `/console/scrape` | Live |
+| Stealth Crawl Engine | `/console/scrape` | Live + events |
 | Ethical OSINT | `/console/osint` | Live |
-| Agentic missions | `/console/missions` | Live |
-| Geospatial HUD | `/console/globe` | Live (demo feeds) |
-| Audit / ROE trail | `/console/audit` | Live |
+| Hermes + OpenClaw + LLM | `/console/missions` | Live |
+| Live Earth globe | `/console/globe` | Live (CelesTrak/TLE API + OpenSky) |
+| Live events (SSE) | `/console/events` | Live |
+| News / Reddit / alerts | `/console/intelligence` | Live |
+| 7-day weather + FX | `/console/weather` | Live |
+| Quantum hybrid | `/console/quantum` | Hybrid-ready |
+| Digital twins | `/console/twins` | Live |
+| Audit / ROE | `/console/audit` | Live |
 | Capability matrix | `/console/capabilities` | Live |
+
+### Modular source layout
+
+```
+src/modules/
+  events/       # real event bus + SSE
+  llm/          # Ollama Llama 3.1, ChatGPT, Hermes, OpenClaw
+  agents/       # Hermes swarm
+  geospatial/   # live SSA + ADS-B + twins
+  weather/      # Open-Meteo 7-day
+  news/         # Reddit + HN + USGS
+  fx/           # Frankfurter/ECB
+  quantum/      # hybrid optimizers + KPIs
+  i18n/         # 20 full-site language catalogs
+src/lib/        # crawl, ethics, audit, osint core
+```
 
 ### API
 
@@ -69,7 +94,7 @@ npm start
 ### Example scrape
 
 ```bash
-curl -s -X POST http://localhost:3000/api/v1/scrape \
+curl -s -X POST http://localhost:3007/api/v1/scrape \
   -H 'content-type: application/json' \
   -d '{"url":"https://example.com","tier":"elevated","deep":false}'
 ```
@@ -77,7 +102,7 @@ curl -s -X POST http://localhost:3000/api/v1/scrape \
 ### Example OSINT
 
 ```bash
-curl -s -X POST http://localhost:3000/api/v1/osint \
+curl -s -X POST http://localhost:3007/api/v1/osint \
   -H 'content-type: application/json' \
   -d '{"query":"example.com"}'
 ```
@@ -135,7 +160,7 @@ Copy `.env.example` → `.env.local` as needed:
 |----------|---------|
 | `HELIXARA_PROXIES` | JSON array of proxy endpoints |
 | `HELIXARA_TOR_SOCKS` | e.g. `socks5://127.0.0.1:9050` (integration hook) |
-| `PORT` | Override listen port |
+| `PORT` | Default **3007** (`npm run dev` / `npm start` pin `-p 3007`) |
 
 ---
 

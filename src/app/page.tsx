@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   Bot,
@@ -8,34 +10,50 @@ import {
   ShieldCheck,
   Zap,
 } from "lucide-react";
+import { useI18n } from "@/modules/i18n/context";
+import type { LocaleCode } from "@/modules/i18n/locales";
 
 export default function HomePage() {
+  const { t, locale, setLocale, locales, dir } = useI18n();
+
   return (
-    <div className="min-h-screen lm-grid">
+    <div className="min-h-screen lm-grid" dir={dir}>
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-16">
-        <div className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-cyan-300/80">
-          <Shield className="h-4 w-4" />
-          HelixaraAI v0.1 · Authorized Use Only
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-cyan-300/80">
+            <Shield className="h-4 w-4" />
+            {t("app.name")} v0.2 · {t("app.authorized")} · :3007
+          </div>
+          <select
+            className="lm-input w-auto text-xs"
+            value={locale}
+            onChange={(e) => setLocale(e.target.value as LocaleCode)}
+          >
+            {locales.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.name}
+              </option>
+            ))}
+          </select>
         </div>
-        <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-[var(--lm-text)] md:text-6xl">
-          Sovereign command for{" "}
-          <span className="text-cyan-300 lm-glow">ethical OSINT</span>, stealth
-          crawl, and mission intelligence.
+
+        <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-[var(--lm-text)] md:text-5xl">
+          {t("home.hero")}
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-[var(--lm-muted)] md:text-lg">
-          The market gap: Firecrawl scrapes. Maltego graphs. Palantir is closed
-          and heavy. Nothing self-hosted fuses military-grade stealth crawling,
-          ROE guardrails, agentic missions, and geospatial fusion into one
-          auditable console. HelixaraAI does.
+          {t("home.sub")}
         </p>
 
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/console" className="lm-btn px-5 py-2.5 text-base">
             <Radar className="h-4 w-4" />
-            Enter Command Console
+            {t("home.cta.console")}
           </Link>
-          <Link href="/console/capabilities" className="lm-btn lm-btn-amber px-5 py-2.5 text-base">
-            Capability Matrix
+          <Link
+            href="/console/capabilities"
+            className="lm-btn lm-btn-amber px-5 py-2.5 text-base"
+          >
+            {t("home.cta.capabilities")}
           </Link>
         </div>
 
@@ -43,23 +61,23 @@ export default function HomePage() {
           {[
             {
               icon: Eye,
-              title: "Stealth Crawl",
-              body: "robots-aware, proxy/Tor hooks, human pacing — built to outclass SaaS scrapers on sovereignty and audit.",
+              title: t("home.card.scrape"),
+              body: t("home.card.scrape.desc"),
             },
             {
               icon: ShieldCheck,
-              title: "Ethical OSINT",
-              body: "DNS, CT logs, HTTP hardening. Dark-web channel is authorization-gated — never default-on.",
+              title: t("home.card.osint"),
+              body: t("home.card.osint.desc"),
             },
             {
               icon: Bot,
-              title: "Agent Missions",
-              body: "Multi-role recon → enrich → analyze → report pipeline with full chain-of-custody.",
+              title: t("home.card.agents"),
+              body: t("home.card.agents.desc"),
             },
             {
               icon: Globe2,
-              title: "Geospatial HUD",
-              body: "Ops nodes, satellite/ADS-B/AIS demo layers, threat pins ready for live feeds.",
+              title: t("home.card.globe"),
+              body: t("home.card.globe.desc"),
             },
           ].map((c) => (
             <div key={c.title} className="lm-panel rounded-lg p-5">
@@ -74,12 +92,7 @@ export default function HomePage() {
 
         <div className="mt-10 flex items-start gap-3 rounded-lg border border-amber-400/30 bg-amber-400/5 p-4 text-sm text-amber-100/90">
           <Zap className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
-          <p>
-            <strong className="text-amber-200">Hard scope:</strong> HelixaraAI is for
-            lawful OSINT and authorized security testing only. No exploit
-            generation, no default wireless attacks, no criminal dark-web
-            automation. Every sensitive action is audited against engagement IDs.
-          </p>
+          <p>{t("home.scope")}</p>
         </div>
       </div>
     </div>

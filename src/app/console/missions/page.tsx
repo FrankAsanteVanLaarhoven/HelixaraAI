@@ -2,41 +2,58 @@
 
 import { useEffect, useState } from "react";
 import { Bot, Loader2, Play } from "lucide-react";
+import { useI18n } from "@/modules/i18n/context";
 
-type Task = {
-  id: string;
+type Agent = {
   role: string;
-  title: string;
   status: string;
-  output?: string;
+  output: string;
+  ms: number;
 };
 
-type Mission = {
+type Run = {
   id: string;
   name: string;
   objective: string;
   target?: string;
   status: string;
-  tasks: Task[];
-  summary?: string;
-  artifacts: { type: string; label: string }[];
-  createdAt: string;
+  provider: string;
+  agents: Agent[];
+  synthesis: string;
+  trainingSamples: number;
+  startedAt: string;
+  finishedAt: string;
+};
+
+type Provider = {
+  id: string;
+  label: string;
+  available: boolean;
+  notes: string;
+  defaultModel: string;
 };
 
 export default function MissionsPage() {
-  const [name, setName] = useState("Surface recon alpha");
+  const { t } = useI18n();
+  const [name, setName] = useState("Hermes surface recon");
   const [objective, setObjective] = useState(
     "Authorized public footprint assessment for defensive hardening"
   );
   const [target, setTarget] = useState("example.com");
+  const [provider, setProvider] = useState("auto");
+  const [useOpenClaw, setUseOpenClaw] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [active, setActive] = useState<Mission | null>(null);
-  const [list, setList] = useState<Mission[]>([]);
+  const [active, setActive] = useState<Run | null>(null);
+  const [list, setList] = useState<Run[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
 
   async function refresh() {
-    const res = await fetch("/api/v1/missions");
-    const data = await res.json();
-    setList(data.missions || []);
+    const [h, l] = await Promise.all([
+      fetch("/api/v1/hermes").then((r) => r.json()),
+      fetch("/api/v1/llm").then((r) => r.json()),
+    ]);
+    setList(h.runs || []);
+    setProviders(l.providers || []);
   }
 
   useEffect(() => {
@@ -46,13 +63,19 @@ export default function MissionsPage() {
   async function launch() {
     setLoading(true);
     try {
-      const res = await fetch("/api/v1/missions", {
+      const res = await fetch("/api/v1/hermes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, objective, target }),
+        body: JSON.stringify({
+          name,
+          objective,
+          target,
+          provider: provider === "auto" ? "auto" : provider,
+          useOpenClaw,
+        }),
       });
-      const mission = await res.json();
-      setActive(mission);
+      const run = await res.json();
+      setActive(run);
       await refresh();
     } finally {
       setLoading(false);
@@ -63,14 +86,24 @@ export default function MissionsPage() {
     <div className="space-y-4">
       <div>
         <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-          Module · Agentic Red Team (Authorized)
+          Module · Hermes + OpenClaw + LLM training
         </div>
-        <h1 className="text-2xl font-semibold">Mission Swarm</h1>
+        <h1 className="text-2xl font-semibold">{t("missions.title")}</h1>
         <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-          Multi-agent pipeline: commander → recon → OSINT → analyst → scribe.
-          Agents plan and report — they do not generate exploits or bypass legal
-          controls.
+          {t("missions.desc")}
         </p>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {providers.map((p) => (
+          <span
+            key={p.id}
+            className={p.available ? "lm-badge lm-badge-live" : "lm-badge lm-badge-warn"}
+            title={p.notes}
+          >
+            {p.label}: {p.available ? "up" : "offline"} · {p.defaultModel}
+          </span>
+        ))}
       </div>
 
       <div className="lm-panel grid gap-3 rounded-lg p-4 md:grid-cols-2">
@@ -100,6 +133,32 @@ export default function MissionsPage() {
             onChange={(e) => setObjective(e.target.value)}
           />
         </div>
+        <div>
+          <label className="mb-1 block text-[11px] uppercase tracking-wider text-[var(--lm-muted)]">
+            LLM backbone
+          </label>
+          <select
+            className="lm-input"
+            value={provider}
+            onChange={(e) => setProvider(e.target.value)}
+          >
+            <option value="auto">auto (Ollama Llama3.1 → ChatGPT → Hermes)</option>
+            <option value="ollama-llama31">Ollama · Llama 3.1 local</option>
+            <option value="openai-chatgpt">OpenAI · ChatGPT</option>
+            <option value="hermes-router">Hermes router only</option>
+            <option value="openclaw">OpenClaw gateway</option>
+          </select>
+        </div>
+        <div className="flex items-end">
+          <label className="flex items-center gap-2 text-sm text-[var(--lm-muted)]">
+            <input
+              type="checkbox"
+              checked={useOpenClaw}
+              onChange={(e) => setUseOpenClaw(e.target.checked)}
+            />
+            Include OpenClaw specialist agent
+          </label>
+        </div>
         <div className="md:col-span-2">
           <button className="lm-btn" onClick={launch} disabled={loading}>
             {loading ? (
@@ -107,7 +166,7 @@ export default function MissionsPage() {
             ) : (
               <Play className="h-4 w-4" />
             )}
-            {loading ? "Agents running…" : "Launch mission"}
+            {loading ? "Hermes running…" : t("missions.launch")}
           </button>
         </div>
       </div>
@@ -115,7 +174,7 @@ export default function MissionsPage() {
       {active ? (
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="lm-panel rounded-lg p-4">
-            <div className="mb-3 flex items-center gap-2">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
               <Bot className="h-4 w-4 text-cyan-300" />
               <h2 className="font-medium">{active.name}</h2>
               <span
@@ -127,45 +186,37 @@ export default function MissionsPage() {
               >
                 {active.status}
               </span>
+              <span className="lm-badge">train samples {active.trainingSamples}</span>
+              <span className="lm-badge">{active.provider}</span>
             </div>
             <div className="space-y-2">
-              {active.tasks.map((t) => (
+              {active.agents?.map((a, i) => (
                 <div
-                  key={t.id}
+                  key={`${a.role}-${i}`}
                   className="rounded border border-[var(--lm-border)] bg-black/20 p-3"
                 >
                   <div className="flex items-center justify-between text-xs">
                     <span className="uppercase tracking-wider text-cyan-300/80">
-                      {t.role}
+                      {a.role}
                     </span>
-                    <span className="lm-badge">{t.status}</span>
+                    <span className="lm-badge">
+                      {a.status} · {a.ms}ms
+                    </span>
                   </div>
-                  <div className="mt-1 text-sm text-[var(--lm-text)]">{t.title}</div>
-                  {t.output ? (
-                    <pre className="mt-2 whitespace-pre-wrap font-mono text-[11px] text-[var(--lm-muted)]">
-                      {t.output}
-                    </pre>
-                  ) : null}
+                  <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap font-mono text-[11px] text-[var(--lm-muted)]">
+                    {a.output}
+                  </pre>
                 </div>
               ))}
             </div>
           </div>
           <div className="lm-panel rounded-lg p-4">
             <div className="mb-2 text-[10px] uppercase tracking-wider text-[var(--lm-muted)]">
-              Mission report draft
+              Synthesis / report
             </div>
             <pre className="max-h-[520px] overflow-auto whitespace-pre-wrap font-mono text-[11px] leading-relaxed text-[var(--lm-muted)]">
-              {active.summary || "Report pending…"}
+              {active.synthesis}
             </pre>
-            {active.artifacts?.length ? (
-              <div className="mt-3 flex flex-wrap gap-1">
-                {active.artifacts.map((a, i) => (
-                  <span key={i} className="lm-badge">
-                    {a.type}: {a.label.slice(0, 40)}
-                  </span>
-                ))}
-              </div>
-            ) : null}
           </div>
         </div>
       ) : null}
@@ -173,7 +224,7 @@ export default function MissionsPage() {
       {list.length > 0 ? (
         <div className="lm-panel rounded-lg p-4">
           <div className="mb-2 text-[10px] uppercase tracking-wider text-[var(--lm-muted)]">
-            Mission history (in-memory)
+            Hermes history
           </div>
           <ul className="space-y-1 text-sm text-[var(--lm-muted)]">
             {list.map((m) => (

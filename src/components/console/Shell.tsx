@@ -5,64 +5,111 @@ import { usePathname } from "next/navigation";
 import {
   Activity,
   Bot,
+  CloudSun,
+  Cpu,
   Eye,
   FileSearch,
   Globe2,
   LayoutDashboard,
+  Newspaper,
+  Orbit,
   Radar,
   ScrollText,
   Shield,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/modules/i18n/context";
+import type { MessageKey } from "@/modules/i18n/locales";
+import type { LocaleCode } from "@/modules/i18n/locales";
 
-const NAV = [
-  { href: "/console", label: "Command", icon: LayoutDashboard },
-  { href: "/console/scrape", label: "Stealth Crawl", icon: Eye },
-  { href: "/console/osint", label: "OSINT", icon: FileSearch },
-  { href: "/console/missions", label: "Agents", icon: Bot },
-  { href: "/console/globe", label: "Geospatial", icon: Globe2 },
-  { href: "/console/audit", label: "Audit", icon: ScrollText },
-  { href: "/console/capabilities", label: "Capabilities", icon: Radar },
+const NAV: { href: string; key: MessageKey; icon: typeof LayoutDashboard }[] = [
+  { href: "/console", key: "nav.command", icon: LayoutDashboard },
+  { href: "/console/scrape", key: "nav.scrape", icon: Eye },
+  { href: "/console/osint", key: "nav.osint", icon: FileSearch },
+  { href: "/console/missions", key: "nav.agents", icon: Bot },
+  { href: "/console/globe", key: "nav.globe", icon: Globe2 },
+  { href: "/console/events", key: "nav.events", icon: Zap },
+  { href: "/console/intelligence", key: "nav.intelligence", icon: Newspaper },
+  { href: "/console/weather", key: "nav.weather", icon: CloudSun },
+  { href: "/console/quantum", key: "nav.quantum", icon: Cpu },
+  { href: "/console/twins", key: "nav.twins", icon: Orbit },
+  { href: "/console/audit", key: "nav.audit", icon: ScrollText },
+  { href: "/console/capabilities", key: "nav.capabilities", icon: Radar },
 ];
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { t, locale, setLocale, currency, setCurrency, locales, dir } = useI18n();
 
   return (
-    <div className="min-h-screen lm-grid">
+    <div className="min-h-screen lm-grid" dir={dir}>
       <header className="sticky top-0 z-40 border-b border-[var(--lm-border)] bg-[#05080fcc] backdrop-blur-md">
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-4 py-3">
+        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 px-4 py-3">
           <Link href="/" className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded border border-cyan-400/40 bg-cyan-400/10">
               <Shield className="h-5 w-5 text-cyan-300" />
             </div>
             <div>
               <div className="text-sm font-semibold tracking-[0.12em] text-cyan-300 lm-glow">
-                HelixaraAI
+                {t("app.name")}
               </div>
               <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--lm-muted)]">
-                Console · Sovereign Intel
+                {t("app.tagline")}
               </div>
             </div>
           </Link>
 
-          <div className="hidden items-center gap-4 text-[11px] text-[var(--lm-muted)] md:flex">
-            <span className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-3 text-[11px] text-[var(--lm-muted)]">
+            <span className="hidden items-center gap-1.5 sm:flex">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--lm-green)] lm-pulse" />
-              SYSTEMS NOMINAL
+              {t("status.systems")}
             </span>
-            <span className="flex items-center gap-1.5">
+            <span className="hidden items-center gap-1.5 md:flex">
               <Activity className="h-3.5 w-3.5" />
-              AUTH LAB MODE
+              :3007
             </span>
-            <span className="lm-badge lm-badge-warn">ROE REQUIRED</span>
+            <span className="lm-badge lm-badge-warn">{t("status.roe")}</span>
+
+            <label className="flex items-center gap-1">
+              <span className="sr-only">{t("common.language")}</span>
+              <select
+                className="lm-input w-auto py-1 text-[11px]"
+                value={locale}
+                onChange={(e) => setLocale(e.target.value as LocaleCode)}
+                title={t("common.language")}
+              >
+                {locales.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-1">
+              <span className="sr-only">{t("common.currency")}</span>
+              <select
+                className="lm-input w-auto py-1 text-[11px]"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                title={t("common.currency")}
+              >
+                {["USD", "EUR", "GBP", "JPY", "CNY", "INR", "AED", "SGD", "AUD", "BRL"].map(
+                  (c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  )
+                )}
+              </select>
+            </label>
           </div>
         </div>
       </header>
 
       <div className="mx-auto flex max-w-[1600px] gap-4 px-4 py-4">
-        <aside className="lm-panel hidden w-56 shrink-0 rounded-lg p-3 md:block">
-          <nav className="space-y-1">
+        <aside className="lm-panel hidden w-56 shrink-0 rounded-lg p-3 lg:block">
+          <nav className="max-h-[70vh] space-y-1 overflow-y-auto">
             {NAV.map((item) => {
               const active =
                 pathname === item.href ||
@@ -79,8 +126,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
                       : "text-[var(--lm-muted)] hover:bg-white/5 hover:text-[var(--lm-text)] border border-transparent"
                   )}
                 >
-                  <Icon className="h-4 w-4" />
-                  {item.label}
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{t(item.key)}</span>
                 </Link>
               );
             })}
@@ -88,10 +135,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
           <div className="mt-6 rounded border border-[var(--lm-border)] bg-black/20 p-3 text-[11px] leading-relaxed text-[var(--lm-muted)]">
             <div className="mb-1 font-semibold uppercase tracking-wider text-cyan-300/80">
-              Ethics lock
+              {t("ethics.lock")}
             </div>
-            Authorized OSINT &amp; defensive testing only. Dark-web and deep ops
-            require engagement attestation. All actions audited.
+            {t("ethics.body")}
           </div>
         </aside>
 

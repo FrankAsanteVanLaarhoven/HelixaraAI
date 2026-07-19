@@ -18,6 +18,7 @@ import {
 import { canFetchUrl } from "@/lib/crawl/robots";
 import { ExtractedPage, extractPage } from "@/lib/crawl/extract";
 import { uid } from "@/lib/utils";
+import { emitEvent } from "@/modules/events/bus";
 
 export interface ScrapeRequest {
   url: string;
@@ -61,6 +62,16 @@ export async function scrapeUrl(
     engagementId: ctx.engagementId,
     severity: decision.allowed ? "info" : "warn",
     details: { jobId, tier, reasons: decision.reasons },
+  });
+
+  emitEvent({
+    type: decision.allowed ? "scrape.started" : "scrape.blocked",
+    source: "crawl.engine",
+    severity: decision.allowed ? "info" : "warn",
+    title: decision.allowed
+      ? `Stealth scrape started · ${req.url}`
+      : `Scrape blocked · ${req.url}`,
+    payload: { jobId, tier, deep, risk: decision.risk },
   });
 
   if (!decision.allowed) {
@@ -200,6 +211,7 @@ export async function scrapeUrl(
       }
     }
 
+    const score = stealthScore(session);
     await appendAudit({
       operatorId: ctx.operatorId,
       action: "scrape.success",
@@ -214,8 +226,28 @@ export async function scrapeUrl(
         words: page.stats.wordCount,
         links: page.stats.linkCount,
         tier,
-        stealth: stealthScore(session).score,
+        stealth: score.score,
       },
+    });
+
+    emitEvent({
+      type: "scrape.completed",
+      source: "crawl.engine",
+      severity: "info",
+      title: `Stealth scrape OK · ${page.title || req.url}`,
+      payload: {
+        jobId,
+        words: page.stats.wordCount,
+        stealth: score.score,
+        tier,
+      },
+    });
+    emitEvent({
+      type: "crawl.stealth",
+      source: "crawl.stealth",
+      severity: "info",
+      title: `Stealth score ${score.score}/99`,
+      payload: { factors: score.factors, sessionId: session.id },
     });
 
     return {
