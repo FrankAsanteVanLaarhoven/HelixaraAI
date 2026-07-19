@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 const bodySchema = z.object({
   provider: z
-    .enum(["ollama-llama31", "openai-chatgpt", "hermes-router", "openclaw"])
+    .enum(["ollama-llama31", "openai-chatgpt", "hermes-router", "openrouter", "openclaw"])
     .optional(),
   model: z.string().optional(),
   messages: z

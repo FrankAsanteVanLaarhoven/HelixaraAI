@@ -9,7 +9,7 @@ const bodySchema = z.object({
   objective: z.string().min(4).max(2000),
   target: z.string().max(500).optional(),
   provider: z
-    .enum(["auto", "ollama-llama31", "openai-chatgpt", "hermes-router", "openclaw"])
+    .enum(["auto", "ollama-llama31", "openai-chatgpt", "hermes-router", "openrouter", "openclaw"])
     .optional(),
   useOpenClaw: z.boolean().optional(),
 });

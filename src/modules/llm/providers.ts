@@ -9,6 +9,7 @@ import { uid } from "@/lib/utils";
 export type LLMProviderId =
   | "ollama-llama31"
   | "openai-chatgpt"
+  | "openrouter"
   | "hermes-router"
   | "openclaw";
 
@@ -51,6 +52,11 @@ export interface ProviderHealth {
 const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434";
 const OPENAI_KEY = process.env.OPENAI_API_KEY || "";
 const OPENAI_BASE = process.env.OPENAI_BASE_URL || "https://api.openai.com/v1";
+const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || "";
+const OPENROUTER_BASE =
+  process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1";
+const OPENROUTER_MODEL =
+  process.env.OPENROUTER_MODEL || "openrouter/auto";
 const OPENCLAW_URL = process.env.OPENCLAW_GATEWAY_URL || "http://127.0.0.1:18789";
 const OPENCLAW_TOKEN = process.env.OPENCLAW_TOKEN || "";
 
@@ -105,12 +111,23 @@ export async function probeProviders(): Promise<ProviderHealth[]> {
   });
 
   results.push({
+    id: "openrouter",
+    label: "OpenRouter (100+ models · Hermes-compatible)",
+    available: Boolean(OPENROUTER_KEY),
+    endpoint: OPENROUTER_BASE,
+    defaultModel: OPENROUTER_MODEL,
+    notes: OPENROUTER_KEY
+      ? "OpenRouter key configured — route free or paid models"
+      : "Set OPENROUTER_API_KEY (same pattern as cloud Hermes setups)",
+  });
+
+  results.push({
     id: "hermes-router",
     label: "Hermes multi-agent router",
     available: true,
     endpoint: "internal://hermes",
     defaultModel: "hermes-ensemble",
-    notes: "Parallel specialist agents with LLM fan-out",
+    notes: "Parallel specialist agents with LLM fan-out + Kanban handoff",
   });
 
   let clawOk = false;
@@ -148,6 +165,7 @@ function pickDefaultProvider(
   }
   if (health.find((h) => h.id === "ollama-llama31")?.available)
     return "ollama-llama31";
+  if (health.find((h) => h.id === "openrouter")?.available) return "openrouter";
   if (health.find((h) => h.id === "openai-chatgpt")?.available)
     return "openai-chatgpt";
   if (health.find((h) => h.id === "openclaw")?.available) return "openclaw";
@@ -214,6 +232,48 @@ async function callOpenAI(req: LLMRequest): Promise<LLMResponse> {
   return {
     id: uid("llm"),
     provider: "openai-chatgpt",
+    model,
+    content: data.choices?.[0]?.message?.content || "",
+    latencyMs: Date.now() - started,
+    usage: {
+      promptTokens: data.usage?.prompt_tokens,
+      completionTokens: data.usage?.completion_tokens,
+    },
+    trainingLogged: false,
+  };
+}
+
+async function callOpenRouter(req: LLMRequest): Promise<LLMResponse> {
+  if (!OPENROUTER_KEY) throw new Error("OPENROUTER_API_KEY not set");
+  const model = req.model || OPENROUTER_MODEL;
+  const started = Date.now();
+  const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${OPENROUTER_KEY}`,
+      "HTTP-Referer": process.env.OPENROUTER_SITE_URL || "https://github.com/FrankAsanteVanLaarhoven/HelixaraAI",
+      "X-Title": "HelixaraAI",
+    },
+    body: JSON.stringify({
+      model,
+      messages: req.messages,
+      temperature: req.temperature ?? 0.3,
+      max_tokens: req.maxTokens ?? 1024,
+    }),
+    signal: AbortSignal.timeout(90_000),
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`OpenRouter HTTP ${res.status}: ${t.slice(0, 200)}`);
+  }
+  const data = (await res.json()) as {
+    choices?: { message?: { content?: string } }[];
+    usage?: { prompt_tokens?: number; completion_tokens?: number };
+  };
+  return {
+    id: uid("llm"),
+    provider: "openrouter",
     model,
     content: data.choices?.[0]?.message?.content || "",
     latencyMs: Date.now() - started,
@@ -294,6 +354,7 @@ export async function completeLLM(req: LLMRequest): Promise<LLMResponse> {
   try {
     if (provider === "ollama-llama31") result = await callOllama(req);
     else if (provider === "openai-chatgpt") result = await callOpenAI(req);
+    else if (provider === "openrouter") result = await callOpenRouter(req);
     else if (provider === "openclaw") result = await callOpenClaw(req);
     else result = hermesFallback(req);
   } catch (err) {
@@ -301,6 +362,12 @@ export async function completeLLM(req: LLMRequest): Promise<LLMResponse> {
     try {
       if (provider !== "ollama-llama31" && health.find((h) => h.id === "ollama-llama31")?.available) {
         result = await callOllama(req);
+        result.fallback = true;
+      } else if (
+        provider !== "openrouter" &&
+        health.find((h) => h.id === "openrouter")?.available
+      ) {
+        result = await callOpenRouter(req);
         result.fallback = true;
       } else if (
         provider !== "openai-chatgpt" &&

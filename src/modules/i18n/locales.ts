@@ -35,6 +35,7 @@ export type MessageKey =
   | "nav.scrape"
   | "nav.osint"
   | "nav.agents"
+  | "nav.kanban"
   | "nav.globe"
   | "nav.audit"
   | "nav.capabilities"
@@ -114,6 +115,7 @@ const en: Catalog = {
   "nav.scrape": "Stealth Crawl",
   "nav.osint": "OSINT",
   "nav.agents": "Agents",
+  "nav.kanban": "Kanban Team",
   "nav.globe": "Geospatial",
   "nav.audit": "Audit",
   "nav.capabilities": "Capabilities",

@@ -142,8 +142,9 @@ export default function MissionsPage() {
             value={provider}
             onChange={(e) => setProvider(e.target.value)}
           >
-            <option value="auto">auto (Ollama Llama3.1 → ChatGPT → Hermes)</option>
+            <option value="auto">auto (Ollama → OpenRouter → ChatGPT → Hermes)</option>
             <option value="ollama-llama31">Ollama · Llama 3.1 local</option>
+            <option value="openrouter">OpenRouter (100+ models)</option>
             <option value="openai-chatgpt">OpenAI · ChatGPT</option>
             <option value="hermes-router">Hermes router only</option>
             <option value="openclaw">OpenClaw gateway</option>
