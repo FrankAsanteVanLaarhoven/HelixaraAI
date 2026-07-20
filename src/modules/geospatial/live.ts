@@ -10,6 +10,7 @@
 
 import { emitEvent } from "@/modules/events/bus";
 import { uid } from "@/lib/utils";
+// twins runtime is loaded dynamically to avoid circular init
 
 export interface LiveEntity {
   id: string;
@@ -255,49 +256,6 @@ const REGIONS = [
   { id: "antarctic", name: "Antarctic", lat: -75, lon: 0, zoom: 3 },
 ];
 
-const OPS_TWINS: LiveEntity[] = [
-  {
-    id: "twin-lon",
-    kind: "twin",
-    label: "Digital Twin · London SOC",
-    lat: 51.5074,
-    lon: -0.1278,
-    meta: { fidelity: "high", synced: true, region: "eu" },
-    source: "helixara.twins",
-    ts: new Date().toISOString(),
-  },
-  {
-    id: "twin-iad",
-    kind: "twin",
-    label: "Digital Twin · NCR Ops",
-    lat: 38.9072,
-    lon: -77.0369,
-    meta: { fidelity: "high", synced: true, region: "na" },
-    source: "helixara.twins",
-    ts: new Date().toISOString(),
-  },
-  {
-    id: "twin-sgp",
-    kind: "twin",
-    label: "Digital Twin · Singapore Edge",
-    lat: 1.3521,
-    lon: 103.8198,
-    meta: { fidelity: "medium", synced: true, region: "apac" },
-    source: "helixara.twins",
-    ts: new Date().toISOString(),
-  },
-  {
-    id: "twin-dxb",
-    kind: "twin",
-    label: "Digital Twin · Dubai Hub",
-    lat: 25.2048,
-    lon: 55.2708,
-    meta: { fidelity: "medium", synced: true, region: "me" },
-    source: "helixara.twins",
-    ts: new Date().toISOString(),
-  },
-];
-
 // Major airline hub airports as visibility anchors
 const AIRPORTS: LiveEntity[] = [
   ["ATL", 33.64, -84.42],
@@ -333,8 +291,20 @@ const AIRPORTS: LiveEntity[] = [
 
 export async function getLiveGeospatialSnapshot(): Promise<LiveSnapshot> {
   const sources: LiveSnapshot["sources"] = [];
-  const entities: LiveEntity[] = [...OPS_TWINS, ...AIRPORTS];
+  let twinEntities: LiveEntity[] = [];
+  try {
+    const { twinsAsLiveEntities } = await import("@/modules/twins/runtime");
+    twinEntities = await twinsAsLiveEntities();
+  } catch {
+    twinEntities = [];
+  }
+  const entities: LiveEntity[] = [...twinEntities, ...AIRPORTS];
   const now = new Date().toISOString();
+  sources.push({
+    id: "digital-twins",
+    status: twinEntities.length ? "ok" : "degraded",
+    detail: `${twinEntities.length} live twins (poll + event sync)`,
+  });
 
   // Satellite groups — public NORAD GP (CelesTrak) in parallel with tight timeouts
   const groups = [
@@ -467,8 +437,8 @@ export async function getLiveGeospatialSnapshot(): Promise<LiveSnapshot> {
     type: "twin.synced",
     source: "digital-twins",
     severity: "info",
-    title: "Ops digital twins synced",
-    payload: { twins: OPS_TWINS.length },
+    title: "Ops digital twins on globe",
+    payload: { twins: twinEntities.length },
   });
 
   return {
@@ -494,8 +464,8 @@ export async function getLiveGeospatialSnapshot(): Promise<LiveSnapshot> {
       },
       {
         name: "Digital twins",
-        value: `${OPS_TWINS.length} live SOC twins`,
-        industry: "Ops fidelity markers",
+        value: `${twinEntities.length} live SOC/edge twins`,
+        industry: "Runtime poll + event-driven sync",
       },
       {
         name: "Regions",
@@ -506,11 +476,12 @@ export async function getLiveGeospatialSnapshot(): Promise<LiveSnapshot> {
   };
 }
 
-export function listDigitalTwins() {
-  return OPS_TWINS.map((t) => ({
-    ...t,
-    id: t.id || uid("twin"),
-    health: "synced",
-    lastSync: new Date().toISOString(),
-  }));
+/** @deprecated use /api/v1/twins runtime */
+export async function listDigitalTwins() {
+  try {
+    const { listTwins } = await import("@/modules/twins/runtime");
+    return await listTwins();
+  } catch {
+    return [];
+  }
 }
