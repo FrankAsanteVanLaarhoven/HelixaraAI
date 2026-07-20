@@ -55,24 +55,38 @@ type RestoreJob = {
   verifyDetail?: string;
 };
 
+type Asset = {
+  id: string;
+  host: string;
+  url: string;
+  sources: string[];
+  live?: boolean;
+  httpStatus?: number;
+  title?: string;
+  lastScannedAt?: string;
+};
+
 export default function BountyPage() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [findings, setFindings] = useState<Finding[]>([]);
   const [restores, setRestores] = useState<RestoreJob[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
   const [policy, setPolicy] = useState("");
+  const [policyDyn, setPolicyDyn] = useState("");
   const [programId, setProgramId] = useState("");
   const [target, setTarget] = useState("example.com");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [msg, setMsg] = useState("");
   const [selectedFinding, setSelectedFinding] = useState<string | null>(null);
+  const [onlyLive, setOnlyLive] = useState(false);
 
   // new program
   const [pName, setPName] = useState("Org web bounty");
   const [pOwner, setPOwner] = useState("Security team");
   const [pEng, setPEng] = useState("BOUNTY-ROE-001");
   const [pLegal, setPLegal] = useState("Signed bug bounty / authorized testing SOW");
-  const [pScope, setPScope] = useState("example.com, www.example.com");
+  const [pScope, setPScope] = useState("*.example.com, example.com");
 
   const load = useCallback(async () => {
     const res = await fetch("/api/v1/bounty", { cache: "no-store" });
@@ -81,8 +95,32 @@ export default function BountyPage() {
     setFindings(data.findings || []);
     setRestores(data.restores || []);
     setPolicy(data.policy?.scope || "");
+    setPolicyDyn(data.policy?.dynamic || "");
+    const pid = programId || data.programs?.[0]?.id || "";
     if (!programId && data.programs?.[0]?.id) {
       setProgramId(data.programs[0].id);
+    }
+    const allAssets = (data.assets || []) as Asset[];
+    if (pid) {
+      setAssets(
+        allAssets.filter(
+          (a) =>
+            (a as Asset & { programId?: string }).programId === pid ||
+            !(a as Asset & { programId?: string }).programId
+        )
+      );
+      // Prefer program-scoped fetch
+      try {
+        const r2 = await fetch(`/api/v1/bounty?kind=assets&id=${pid}`, {
+          cache: "no-store",
+        });
+        const d2 = await r2.json();
+        if (d2.assets) setAssets(d2.assets);
+      } catch {
+        /* keep snapshot assets */
+      }
+    } else {
+      setAssets(allAssets);
     }
   }, [programId]);
 
@@ -157,7 +195,38 @@ export default function BountyPage() {
     });
     if (data?.ok) {
       setMsg(
-        `Scan complete · ${data.findings?.length ?? data.host ? "ok" : ""} · host ${data.host || target} · ${(data.findings || []).length} total for program`
+        `Scan complete · host ${data.host || target} · ${(data.findings || []).length} findings for program`
+      );
+    }
+  }
+
+  async function discoverAll() {
+    const data = await post({
+      action: "discover",
+      programId,
+      maxHosts: 80,
+      probeLive: true,
+    });
+    if (data?.ok) {
+      setAssets(data.assets || []);
+      setMsg(
+        `Discovered ${data.stats?.total ?? data.assets?.length ?? 0} sites (CT ${data.stats?.crt ?? 0} · DNS ${data.stats?.prefix ?? 0} · live ${data.stats?.live ?? 0})`
+      );
+    }
+  }
+
+  async function scanAllDynamic() {
+    const data = await post({
+      action: "scan.all",
+      programId,
+      rediscover: true,
+      onlyLive,
+      maxSites: 40,
+    });
+    if (data?.ok) {
+      setAssets(data.assets || []);
+      setMsg(
+        `Dynamic scan · ${data.scanned?.length ?? 0} sites · ${data.findingCount ?? 0} new findings · errors ${data.errors?.length ?? 0}`
       );
     }
   }
@@ -208,6 +277,9 @@ export default function BountyPage() {
       {policy ? (
         <div className="rounded border border-amber-400/30 bg-amber-400/5 p-3 text-xs text-amber-100/90">
           {policy}
+          {policyDyn ? (
+            <div className="mt-1 text-cyan-100/80">{policyDyn}</div>
+          ) : null}
         </div>
       ) : null}
 
@@ -273,12 +345,48 @@ export default function BountyPage() {
               className="lm-input min-h-[56px] text-sm"
               value={pScope}
               onChange={(e) => setPScope(e.target.value)}
-              placeholder="In-scope hosts (comma-separated)"
+              placeholder="In-scope roots (*.example.com, example.com)"
             />
             <button className="lm-btn w-full" disabled={busy} onClick={createProgram}>
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               Create program
             </button>
+          </div>
+
+          <div className="lm-panel max-h-[28vh] overflow-auto rounded-lg">
+            <div className="sticky top-0 border-b border-[var(--lm-border)] bg-[var(--lm-panel)] px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--lm-muted)]">
+              Dynamic sites ({assets.length})
+            </div>
+            <ul className="divide-y divide-[var(--lm-border)]">
+              {assets.map((a) => (
+                <li key={a.id || a.host}>
+                  <button
+                    type="button"
+                    className="w-full px-3 py-2 text-left text-[12px] hover:bg-white/[0.03]"
+                    onClick={() => setTarget(a.host)}
+                  >
+                    <div className="flex flex-wrap items-center gap-2 font-mono text-cyan-200/90">
+                      {a.host}
+                      {a.live === true ? (
+                        <span className="lm-badge lm-badge-live">live</span>
+                      ) : a.live === false ? (
+                        <span className="lm-badge">down</span>
+                      ) : null}
+                    </div>
+                    <div className="text-[10px] text-[var(--lm-muted)]">
+                      {(a.sources || []).join(", ")}
+                      {a.httpStatus ? ` · HTTP ${a.httpStatus}` : ""}
+                      {a.title ? ` · ${a.title}` : ""}
+                    </div>
+                  </button>
+                </li>
+              ))}
+              {!assets.length ? (
+                <li className="p-4 text-center text-[12px] text-[var(--lm-muted)]">
+                  Run Discover all sites to expand wildcards dynamically.
+                </li>
+              ) : null}
+            </ul>
           </div>
         </div>
 
@@ -288,7 +396,7 @@ export default function BountyPage() {
             <div className="flex flex-wrap items-end gap-3">
               <div className="min-w-[200px] flex-1">
                 <label className="mb-1 block text-[11px] text-[var(--lm-muted)]">
-                  Target (must be in-scope)
+                  Single target (or pick from dynamic list)
                 </label>
                 <input
                   className="lm-input font-mono"
@@ -309,9 +417,43 @@ export default function BountyPage() {
                 Find bugs
               </button>
             </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                className="lm-btn"
+                disabled={busy || !programId}
+                onClick={discoverAll}
+              >
+                {busy ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                Discover all sites
+              </button>
+              <button
+                className="lm-btn"
+                disabled={busy || !programId}
+                onClick={scanAllDynamic}
+              >
+                {busy ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Search className="h-4 w-4" />
+                )}
+                Scan all dynamically
+              </button>
+              <label className="flex items-center gap-2 text-[11px] text-[var(--lm-muted)]">
+                <input
+                  type="checkbox"
+                  checked={onlyLive}
+                  onChange={(e) => setOnlyLive(e.target.checked)}
+                />
+                Live hosts only
+              </label>
+            </div>
             <p className="text-[11px] text-[var(--lm-muted)]">
-              Checks: security headers, TLS, DNS, CORS hints, cookies, robots surface,
-              tech fingerprint, open-redirect heuristics. No exploit payloads.
+              Dynamic: Certificate Transparency + DNS prefixes + sitemaps under your
+              in-scope roots (*.domain). Then scans every discovered site still in ROE.
             </p>
           </div>
 
@@ -453,15 +595,15 @@ export default function BountyPage() {
           <div className="lm-panel rounded-lg p-3 text-[11px] leading-relaxed text-[var(--lm-muted)]">
             <strong className="text-[var(--lm-text)]">Capabilities</strong>
             <ul className="mt-1 list-inside list-disc space-y-0.5">
-              <li>Program scope + ROE binding</li>
-              <li>Safe surface bug search (find)</li>
-              <li>Finding triage statuses</li>
-              <li>Restore steps + health probe</li>
-              <li>Audit trail on scan/restore</li>
+              <li>Wildcard roots (*.example.com)</li>
+              <li>Dynamic discovery of all related sites</li>
+              <li>Scan all sites dynamically</li>
+              <li>Safe surface bug search + restore</li>
+              <li>Audit trail</li>
             </ul>
             <p className="mt-2">
-              Only hosts listed in program <em>in-scope</em> can be scanned or restored.
-              This is not unauthorized scanning of arbitrary systems.
+              All discovered hosts must still match program scope / ROE. Not open-internet
+              scanning outside your authorized roots.
             </p>
           </div>
         </div>

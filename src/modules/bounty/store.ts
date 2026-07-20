@@ -3,12 +3,15 @@ import {
   ALL_CHECKS,
   type BountyFinding,
   type BountyProgram,
+  type DynamicAsset,
   type RestoreJob,
 } from "@/modules/bounty/types";
 
 const programs = new Map<string, BountyProgram>();
 const findings = new Map<string, BountyFinding>();
 const restores = new Map<string, RestoreJob>();
+/** programId → dynamic site inventory */
+const assetsByProgram = new Map<string, DynamicAsset[]>();
 
 function seed() {
   if (programs.size) return;
@@ -21,15 +24,17 @@ function seed() {
     owner: "Helixara Lab",
     engagementId: "BOUNTY-DEMO-001",
     legalBasis: "Owned lab assets / authorized demo scope",
-    inScope: ["example.com", "www.example.com", "httpbin.org"],
+    inScope: ["*.example.com", "example.com", "httpbin.org"],
     outOfScope: ["*.third-party.example", "production-payments"],
     allowedChecks: [...ALL_CHECKS],
     maxSeverityAutoAccept: "medium",
+    dynamicDiscovery: true,
     active: true,
     expiresAt: new Date(Date.now() + 30 * 24 * 3600_000).toISOString(),
     createdAt: now,
     updatedAt: now,
-    notes: "Demo program — replace with real ROE scope before production use.",
+    notes:
+      "Demo program — use *.domain wildcards + dynamic discovery for all sites under authorized roots.",
   });
 }
 
@@ -73,6 +78,7 @@ export function createProgram(input: {
       ? input.allowedChecks
       : [...ALL_CHECKS],
     maxSeverityAutoAccept: "medium",
+    dynamicDiscovery: true,
     active: true,
     expiresAt:
       input.expiresAt ||
@@ -83,6 +89,40 @@ export function createProgram(input: {
   };
   programs.set(id, p);
   return p;
+}
+
+export function listProgramAssets(programId: string): DynamicAsset[] {
+  return [...(assetsByProgram.get(programId) || [])].sort((a, b) =>
+    a.host.localeCompare(b.host)
+  );
+}
+
+export function setProgramAssets(programId: string, assets: DynamicAsset[]) {
+  // dedupe by host
+  const byHost = new Map<string, DynamicAsset>();
+  for (const a of assets) {
+    const prev = byHost.get(a.host);
+    if (!prev) {
+      byHost.set(a.host, a);
+      continue;
+    }
+    const sources = [...new Set([...prev.sources, ...a.sources])];
+    byHost.set(a.host, {
+      ...prev,
+      ...a,
+      sources,
+      live: a.live ?? prev.live,
+      lastScannedAt: a.lastScannedAt || prev.lastScannedAt,
+    });
+  }
+  assetsByProgram.set(programId, [...byHost.values()]);
+  return listProgramAssets(programId);
+}
+
+export function listAllAssets(): DynamicAsset[] {
+  const all: DynamicAsset[] = [];
+  for (const rows of assetsByProgram.values()) all.push(...rows);
+  return all.sort((a, b) => a.host.localeCompare(b.host));
 }
 
 export function touchProgram(p: BountyProgram) {
@@ -130,11 +170,15 @@ export function snapshot() {
   return {
     policy: {
       scope:
-        "Bug bounty search/find/restore only on program in-scope assets under attested ROE. Not unauthorized scanning of arbitrary systems.",
-      dualControlElevated: "Destructive restore automation stays manual steps + verify probes.",
+        "Bug bounty search/find/restore on program in-scope roots. Dynamic discovery expands *.domain and seeds into all related sites (CT, DNS prefixes, sitemaps) still within ROE. Not unauthorized internet-wide scanning.",
+      dynamic:
+        "Discover all sites under scope, then Scan all dynamically. Wildcards (*.example.com) recommended.",
+      dualControlElevated:
+        "Destructive restore automation stays manual steps + verify probes.",
     },
     programs: listPrograms(),
-    findings: listFindings(undefined, 80),
+    findings: listFindings(undefined, 200),
     restores: listRestores(40),
+    assets: listAllAssets(),
   };
 }

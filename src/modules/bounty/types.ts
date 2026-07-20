@@ -32,17 +32,33 @@ export interface BountyProgram {
   owner: string;
   engagementId: string;
   legalBasis: string;
-  /** Domains, hosts, CIDRs as strings — must match before scan */
+  /** Domains, hosts, wildcards (*.example.com) — seeds for dynamic discovery */
   inScope: string[];
   outOfScope: string[];
   /** Safe modules allowed */
   allowedChecks: BountyCheckId[];
   maxSeverityAutoAccept: BountySeverity;
+  /** Dynamically expand all sites under scope roots */
+  dynamicDiscovery: boolean;
   active: boolean;
   expiresAt: string;
   createdAt: string;
   updatedAt: string;
   notes?: string;
+}
+
+/** Dynamically discovered site under a program */
+export interface DynamicAsset {
+  id: string;
+  programId: string;
+  host: string;
+  url: string;
+  sources: ("seed" | "crt" | "prefix" | "sitemap" | "manual")[];
+  live?: boolean;
+  httpStatus?: number;
+  title?: string;
+  discoveredAt: string;
+  lastScannedAt?: string;
 }
 
 export type BountyCheckId =

@@ -6,12 +6,17 @@ import {
   getProgram,
   getRestore,
   listFindings,
+  listProgramAssets,
   listPrograms,
   listRestores,
   saveFinding,
   snapshot,
 } from "@/modules/bounty/store";
 import { runBountyScan } from "@/modules/bounty/scan";
+import {
+  discoverProgramSites,
+  runDynamicScanAll,
+} from "@/modules/bounty/discover";
 import {
   advanceRestoreStep,
   completeRestore,
@@ -48,7 +53,14 @@ export async function GET(req: NextRequest) {
     if (!p) return NextResponse.json({ error: "not found" }, { status: 404 });
     return NextResponse.json({
       program: p,
-      findings: listFindings(id, 100),
+      findings: listFindings(id, 200),
+      assets: listProgramAssets(id),
+    });
+  }
+  if (kind === "assets" && id) {
+    return NextResponse.json({
+      programId: id,
+      assets: listProgramAssets(id),
     });
   }
   return NextResponse.json({
@@ -116,7 +128,55 @@ export async function POST(req: NextRequest) {
       }
       return NextResponse.json({
         ...result,
-        findings: listFindings(parsed.data.programId, 100),
+        findings: listFindings(parsed.data.programId, 200),
+        assets: listProgramAssets(parsed.data.programId),
+      });
+    }
+
+    if (action === "discover") {
+      const parsed = z
+        .object({
+          programId: z.string(),
+          maxHosts: z.number().optional(),
+          probeLive: z.boolean().optional(),
+        })
+        .safeParse(body);
+      if (!parsed.success) {
+        return NextResponse.json({ error: "invalid body" }, { status: 400 });
+      }
+      const result = await discoverProgramSites(parsed.data);
+      if (!result.ok) {
+        return NextResponse.json(result, { status: 400 });
+      }
+      return NextResponse.json(result);
+    }
+
+    if (action === "scan.all") {
+      const parsed = z
+        .object({
+          programId: z.string(),
+          rediscover: z.boolean().optional(),
+          onlyLive: z.boolean().optional(),
+          maxSites: z.number().optional(),
+          checks: z.array(z.string()).optional(),
+        })
+        .safeParse(body);
+      if (!parsed.success) {
+        return NextResponse.json({ error: "invalid body" }, { status: 400 });
+      }
+      const result = await runDynamicScanAll({
+        programId: parsed.data.programId,
+        rediscover: parsed.data.rediscover ?? true,
+        onlyLive: parsed.data.onlyLive,
+        maxSites: parsed.data.maxSites,
+        checks: parsed.data.checks,
+      });
+      if (!result.ok) {
+        return NextResponse.json(result, { status: 400 });
+      }
+      return NextResponse.json({
+        ...result,
+        findings: listFindings(parsed.data.programId, 200),
       });
     }
 
@@ -188,6 +248,8 @@ export async function POST(req: NextRequest) {
         allowed: [
           "program.create",
           "scan",
+          "discover",
+          "scan.all",
           "finding.status",
           "restore.create",
           "restore.step",
