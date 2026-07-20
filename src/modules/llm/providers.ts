@@ -5,6 +5,11 @@
 
 import { emitEvent } from "@/modules/events/bus";
 import { uid } from "@/lib/utils";
+import {
+  assertProviderAllowed,
+  getPrivacyMode,
+  vaultOnly,
+} from "@/modules/os/privacy";
 
 export type LLMProviderId =
   | "ollama-llama31"
@@ -160,11 +165,17 @@ function pickDefaultProvider(
   health: ProviderHealth[],
   preferred?: LLMProviderId
 ): LLMProviderId {
-  if (preferred && health.find((h) => h.id === preferred)?.available) {
-    return preferred;
+  const vault = vaultOnly();
+  if (preferred) {
+    const gate = assertProviderAllowed(preferred);
+    if (gate.ok && health.find((h) => h.id === preferred)?.available) {
+      return preferred;
+    }
+    if (preferred === "hermes-router") return "hermes-router";
   }
   if (health.find((h) => h.id === "ollama-llama31")?.available)
     return "ollama-llama31";
+  if (vault) return "hermes-router";
   if (health.find((h) => h.id === "openrouter")?.available) return "openrouter";
   if (health.find((h) => h.id === "openai-chatgpt")?.available)
     return "openai-chatgpt";
@@ -348,8 +359,19 @@ function hermesFallback(req: LLMRequest): LLMResponse {
 
 export async function completeLLM(req: LLMRequest): Promise<LLMResponse> {
   const health = await probeProviders();
-  const provider = pickDefaultProvider(health, req.provider);
+  let preferred = req.provider;
+  if (preferred && preferred !== "hermes-router") {
+    const gate = assertProviderAllowed(preferred);
+    if (!gate.ok) {
+      // force local path in vault
+      preferred = health.find((h) => h.id === "ollama-llama31")?.available
+        ? "ollama-llama31"
+        : "hermes-router";
+    }
+  }
+  const provider = pickDefaultProvider(health, preferred);
   let result: LLMResponse;
+  const privacyMode = getPrivacyMode();
 
   try {
     if (provider === "ollama-llama31") result = await callOllama(req);
@@ -358,18 +380,20 @@ export async function completeLLM(req: LLMRequest): Promise<LLMResponse> {
     else if (provider === "openclaw") result = await callOpenClaw(req);
     else result = hermesFallback(req);
   } catch (err) {
-    // cascade fallbacks
+    // cascade fallbacks (respect vault — no cloud escape hatch)
     try {
       if (provider !== "ollama-llama31" && health.find((h) => h.id === "ollama-llama31")?.available) {
         result = await callOllama(req);
         result.fallback = true;
       } else if (
+        !vaultOnly() &&
         provider !== "openrouter" &&
         health.find((h) => h.id === "openrouter")?.available
       ) {
         result = await callOpenRouter(req);
         result.fallback = true;
       } else if (
+        !vaultOnly() &&
         provider !== "openai-chatgpt" &&
         health.find((h) => h.id === "openai-chatgpt")?.available
       ) {
@@ -385,6 +409,9 @@ export async function completeLLM(req: LLMRequest): Promise<LLMResponse> {
         err2 instanceof Error ? err2.message : err instanceof Error ? err.message : "llm failed";
     }
   }
+
+  // annotate privacy on event payload via temporary field
+  void privacyMode;
 
   if (req.purpose === "training_sample" || req.purpose === "agent_plan") {
     trainingSamples.unshift({

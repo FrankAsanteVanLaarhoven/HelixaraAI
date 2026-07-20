@@ -13,6 +13,7 @@ import {
   Globe2,
   LayoutDashboard,
   MapPinned,
+  MonitorSmartphone,
   Newspaper,
   Orbit,
   Radar,
@@ -27,6 +28,7 @@ import type { LocaleCode } from "@/modules/i18n/locales";
 
 const NAV: { href: string; key: MessageKey; icon: typeof LayoutDashboard }[] = [
   { href: "/console", key: "nav.command", icon: LayoutDashboard },
+  { href: "/console/os", key: "nav.os", icon: MonitorSmartphone },
   { href: "/console/scrape", key: "nav.scrape", icon: Eye },
   { href: "/console/osint", key: "nav.osint", icon: FileSearch },
   { href: "/console/missions", key: "nav.agents", icon: Bot },

@@ -32,6 +32,7 @@ export type MessageKey =
   | "app.tagline"
   | "app.authorized"
   | "nav.command"
+  | "nav.os"
   | "nav.scrape"
   | "nav.osint"
   | "nav.agents"
@@ -113,6 +114,7 @@ const en: Catalog = {
   "app.tagline": "Console · Sovereign Intel",
   "app.authorized": "Authorized use only",
   "nav.command": "Command",
+  "nav.os": "Helixara OS",
   "nav.scrape": "Stealth Crawl",
   "nav.osint": "OSINT",
   "nav.agents": "Agents",
