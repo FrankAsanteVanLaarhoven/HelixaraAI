@@ -86,12 +86,9 @@ export default function MissionsPage() {
     <div className="space-y-4">
       <div>
         <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-          Module · Hermes + OpenClaw + LLM training
-        </div>
+            Hermes
+          </div>
         <h1 className="text-2xl font-semibold">{t("missions.title")}</h1>
-        <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-          {t("missions.desc")}
-        </p>
       </div>
 
       <div className="flex flex-wrap gap-2">

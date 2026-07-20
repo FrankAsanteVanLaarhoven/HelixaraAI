@@ -40,14 +40,9 @@ export default function AuditPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-            Module · Audit & ROE
+            Audit & ROE
           </div>
           <h1 className="text-2xl font-semibold">Chain of Custody</h1>
-          <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-            Every scrape, OSINT query, mission, and geospatial read is recorded
-            with operator, engagement ID, risk, and allow/deny decision. Persisted
-            to <code className="text-cyan-200">data/audit.ndjson</code>.
-          </p>
         </div>
         <button className="lm-btn" onClick={load} disabled={loading}>
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />

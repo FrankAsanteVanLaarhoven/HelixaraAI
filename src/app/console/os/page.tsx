@@ -165,15 +165,11 @@ export default function OsPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-            Helixara OS · Local-first intelligence
+            Helixara OS
           </div>
           <h1 className="text-2xl font-semibold">
             {data?.name || "Helixara OS"}
           </h1>
-          <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-            {data?.tagline ||
-              "One home for agents, memory, models, and connections — vault or cloud."}
-          </p>
         </div>
         <div
           className={cn(

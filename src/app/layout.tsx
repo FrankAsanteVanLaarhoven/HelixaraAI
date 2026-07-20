@@ -15,9 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HelixaraAI — Sovereign OSINT & Stealth Command",
-  description:
-    "HelixaraAI — modular production console: ethical OSINT, stealth crawl, Hermes/OpenClaw agents, live SSA/ADS-B, quantum hybrids, digital twins, 20-language i18n.",
+  title: "HelixaraAI",
+  description: "HelixaraAI console",
   applicationName: "HelixaraAI",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],

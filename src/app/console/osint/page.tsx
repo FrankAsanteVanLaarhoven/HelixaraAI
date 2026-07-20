@@ -46,15 +46,9 @@ export default function OsintPage() {
     <div className="space-y-4">
       <div>
         <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-          Module · OSINT
-        </div>
+            OSINT
+          </div>
         <h1 className="text-2xl font-semibold">Ethical Intelligence Fusion</h1>
-        <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-          Public-source enrichment: DNS over HTTPS, Certificate Transparency,
-          HTTP security posture. Dark-web indexing is{" "}
-          <strong className="text-amber-200">authorization-gated</strong> and
-          disabled unless ROE scopes are present.
-        </p>
       </div>
 
       <div className="lm-panel flex flex-wrap items-end gap-3 rounded-lg p-4">

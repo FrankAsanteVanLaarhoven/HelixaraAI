@@ -53,12 +53,9 @@ export default function EventsPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-            Module · Events
+            Events
           </div>
           <h1 className="text-2xl font-semibold">{t("events.title")}</h1>
-          <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-            {t("events.desc")}
-          </p>
         </div>
         <button className="lm-btn" onClick={load}>
           <RefreshCw className="h-4 w-4" />

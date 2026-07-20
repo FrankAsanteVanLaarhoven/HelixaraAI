@@ -87,7 +87,7 @@ async function fetchCelestrakGroup(
     try {
       const res = await fetch(url, {
         headers: {
-          "User-Agent": "HelixaraAI/0.2 (+authorized research; production console)",
+          "User-Agent": "HelixaraAI/0.2 (+authorized research)",
           Accept: "text/plain,*/*",
         },
         signal: AbortSignal.timeout(12_000),

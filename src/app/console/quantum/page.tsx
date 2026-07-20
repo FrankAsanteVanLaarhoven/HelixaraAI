@@ -50,12 +50,9 @@ export default function QuantumPage() {
     <div className="space-y-4">
       <div>
         <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-          Module · Quantum
-        </div>
+            Quantum
+          </div>
         <h1 className="text-2xl font-semibold">{t("quantum.title")}</h1>
-        <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-          {t("quantum.desc")}
-        </p>
       </div>
 
       {report ? (
@@ -110,7 +107,7 @@ export default function QuantumPage() {
           </div>
           <div className="lm-panel rounded-lg p-4">
             <div className="text-[10px] uppercase text-[var(--lm-muted)]">
-              Industry benchmarks
+              Benchmarks
             </div>
             <ul className="mt-2 space-y-2 text-sm">
               {benchmarks.map((b) => (

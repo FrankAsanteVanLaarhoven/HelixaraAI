@@ -140,14 +140,9 @@ export default function WirelessPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-            Module · Wireless lab (passive)
+            Wireless lab
           </div>
           <h1 className="text-2xl font-semibold">Wi‑Fi scan & target select</h1>
-          <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-            Discover nearby networks and choose an AP + optional client for{" "}
-            <strong className="text-amber-200">authorized lab / ROE work</strong>
-            . Passive scan only — no deauth, no evil twin, no forced reconnect.
-          </p>
         </div>
         <button className="lm-btn" onClick={runScan} disabled={loading}>
           {loading ? (

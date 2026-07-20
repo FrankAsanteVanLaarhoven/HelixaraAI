@@ -40,13 +40,9 @@ export default function WeatherPage() {
     <div className="space-y-4">
       <div>
         <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-          Module · Weather & FX
-        </div>
+            Weather & FX
+          </div>
         <h1 className="text-2xl font-semibold">{t("weather.title")}</h1>
-        <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-          {t("weather.desc")} · {t("common.currency")}: {currency}
-          {fx?.[currency] != null ? ` · 1 USD = ${fx[currency]} ${currency}` : ""}
-        </p>
       </div>
 
       <div className="flex flex-wrap gap-2">

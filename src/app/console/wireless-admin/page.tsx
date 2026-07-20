@@ -75,10 +75,6 @@ export default function WirelessAdminPage() {
           Admin controls
         </div>
         <h1 className="text-2xl font-semibold">Wi‑Fi monitoring governance</h1>
-        <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-          Kill switch, lab mode, allowlists, rate limits. Offensive OTA features
-          cannot be enabled — they are not in the product.
-        </p>
       </div>
 
       {boundaries ? (

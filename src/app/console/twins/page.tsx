@@ -194,14 +194,9 @@ export default function TwinsPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-            Module · Digital Twins (live runtime)
+            Digital Twins
           </div>
-          <h1 className="text-2xl font-semibold">Live Digital Twins</h1>
-          <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-            SOC and edge node twins with real poll + event-driven sync, fidelity
-            levels, CMDB/cloud/OT bindings, metrics, and globe pins — not a
-            static JSON blurb.
-          </p>
+          <h1 className="text-2xl font-semibold">Digital Twins</h1>
         </div>
         <div className="flex flex-wrap gap-2">
           <button className="lm-btn" onClick={load}>

@@ -2,7 +2,7 @@
   "name": "helixaraai",
   "version": "0.2.0",
   "private": true,
-  "description": "HelixaraAI — modular sovereign OSINT, stealth crawl, Hermes/OpenClaw, live Earth, quantum hybrid",
+  "description": "HelixaraAI console",
   "scripts": {
     "dev": "next dev -p 3007",
     "dev:3007": "next dev -p 3007",

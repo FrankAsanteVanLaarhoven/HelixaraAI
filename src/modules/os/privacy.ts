@@ -67,8 +67,7 @@ export function privacyPolicy() {
         ],
       },
     },
-    ownership:
-      "Sovereign stack: you own the models, memory, and audit trail. No vendor lock-in required.",
+    ownership: "Local models, memory, and audit trail under operator control.",
   };
 }
 

@@ -61,14 +61,9 @@ export default function ScrapePage() {
     <div className="space-y-4">
       <div>
         <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-          Module · Stealth Crawl
+          Crawl
         </div>
-        <h1 className="text-2xl font-semibold">Cyberscrape Engine</h1>
-        <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-          Enterprise self-hosted crawl with stealth sessions, robots respect,
-          structured extraction, and full audit — designed to beat SaaS scrapers
-          on sovereignty, evasion hygiene, and compliance.
-        </p>
+        <h1 className="text-2xl font-semibold">Crawl</h1>
       </div>
 
       <div className="lm-panel space-y-3 rounded-lg p-4">

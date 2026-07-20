@@ -67,13 +67,9 @@ export default function TelemetryPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-            Module · Engagement Telemetry
+            Telemetry
           </div>
-          <h1 className="text-2xl font-semibold">Recent Entries · Map</h1>
-          <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-            SOTA ops map for authorized mission pins and SOC nodes. Not a covert
-            victim-tracking product.
-          </p>
+          <h1 className="text-2xl font-semibold">Telemetry</h1>
         </div>
         <button className="lm-btn" onClick={load} disabled={loading}>
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />

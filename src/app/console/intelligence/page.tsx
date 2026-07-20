@@ -48,12 +48,9 @@ export default function IntelligencePage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-            Module · Intelligence
+            Intelligence
           </div>
           <h1 className="text-2xl font-semibold">{t("intel.title")}</h1>
-          <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-            {t("intel.desc")}
-          </p>
         </div>
         <button className="lm-btn" onClick={load} disabled={loading}>
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />

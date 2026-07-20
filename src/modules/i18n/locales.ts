@@ -164,43 +164,37 @@ const en: Catalog = {
   "console.metrics.layers": "Geo",
   "console.quick": "Modules",
   "console.market": "",
-  "scrape.title": "Cyberscrape Engine",
-  "scrape.desc":
-    "Enterprise self-hosted crawl with stealth sessions, robots respect, structured extraction, full audit.",
+  "scrape.title": "Crawl",
+  "scrape.desc": "",
   "scrape.url": "Target URL",
   "scrape.deep": "Deep same-origin crawl",
   "scrape.tier": "Stealth tier",
-  "scrape.execute": "Execute scrape",
+  "scrape.execute": "Run crawl",
   "scrape.running": "Crawling…",
-  "osint.title": "Ethical Intelligence Fusion",
-  "osint.desc":
-    "Public-source enrichment: DNS over HTTPS, Certificate Transparency, HTTP posture.",
+  "osint.title": "OSINT",
+  "osint.desc": "",
   "osint.query": "Domain / entity query",
   "osint.run": "Run OSINT",
-  "missions.title": "Hermes Mission Swarm",
-  "missions.desc":
-    "Parallel specialists + OpenClaw + LLM backbone (Llama 3.1 / ChatGPT).",
-  "missions.launch": "Launch Hermes swarm",
-  "globe.title": "God's Eye · Live Earth",
-  "globe.desc":
-    "Real public NORAD-derived TLEs (CelesTrak), ADS-B, airport hubs, digital twins, regional presets.",
+  "missions.title": "Agents",
+  "missions.desc": "",
+  "missions.launch": "Launch mission",
+  "globe.title": "Geospatial",
+  "globe.desc": "",
   "globe.layers": "Layers & regions",
-  "audit.title": "Chain of Custody",
-  "audit.desc": "Every sensitive action is audited with operator and engagement context.",
-  "events.title": "Live Event Stream",
-  "events.desc": "Real modular bus events across scrape, OSINT, agents, geo, alerts, FX.",
-  "intel.title": "News, Reddit & Global Alerts",
-  "intel.desc": "Reddit, Hacker News, USGS seismic alerts fused for operators.",
-  "quantum.title": "Hybrid Quantum Intelligence",
-  "quantum.desc":
-    "Narrow NISQ-safe hybrids with classical surrogates and industry KPIs.",
-  "weather.title": "7-Day Weather",
-  "weather.desc": "Open-Meteo global forecast for mission planning and regional ops.",
-  "twins.title": "Live Digital Twins",
-  "twins.desc": "SOC and edge node twins synchronized with the live globe.",
+  "audit.title": "Audit",
+  "audit.desc": "",
+  "events.title": "Events",
+  "events.desc": "",
+  "intel.title": "News & Alerts",
+  "intel.desc": "",
+  "quantum.title": "Quantum",
+  "quantum.desc": "",
+  "weather.title": "Weather",
+  "weather.desc": "",
+  "twins.title": "Digital Twins",
+  "twins.desc": "",
   "ethics.lock": "Ethics lock",
-  "ethics.body":
-    "Authorized OSINT & defensive testing only. Dark-web and deep ops require engagement attestation. All actions audited.",
+  "ethics.body": "Authorized use only. Actions are audited.",
   "common.refresh": "Refresh",
   "common.loading": "Loading…",
   "common.language": "Language",
@@ -229,38 +223,38 @@ const packs: Partial<Record<LocaleCode, Partial<Catalog>>> = {
     "status.roe": "ROE REQUERIDO",
     "status.systems": "SISTEMAS NOMINALES",
     "home.hero":
-      "Mando soberano para OSINT ético, rastreo furtivo e inteligencia de misiones.",
+      "HelixaraAI",
     "home.sub":
-      "Consola modular de producción: satélites en vivo, ADS-B, agentes Hermes y OpenClaw, entrenamiento Llama 3.1 / ChatGPT, híbridos cuánticos, gemelos digitales, localización completa.",
+      "",
     "home.cta.console": "Entrar a la consola",
     "home.cta.capabilities": "Matriz de capacidades",
     "home.card.scrape": "Rastreo furtivo",
     "home.card.scrape.desc":
-      "Rastreo dinámico con respeto a robots, niveles de proxy y diseño con auditoría primero.",
+      "",
     "home.card.osint": "OSINT ético",
     "home.card.osint.desc":
-      "DNS, registros CT, cabeceras. Canal dark-web con autorización.",
+      "",
     "home.card.agents": "Hermes + OpenClaw",
     "home.card.agents.desc":
-      "Enjambres multiagente con Ollama Llama 3.1 y ganchos de entrenamiento ChatGPT.",
+      "",
     "home.card.globe": "Globo terrestre en vivo",
     "home.card.globe.desc":
-      "Satélites CelesTrak NORAD GP, vuelos OpenSky, hubs, gemelos, todas las regiones.",
+      "",
     "home.scope":
-      "Alcance estricto: solo OSINT lícito y pruebas de seguridad autorizadas. Traducciones completas del sitio, feeds en vivo y rastreo furtivo de grado empresarial.",
+      "",
     "console.title": "Resumen de mando",
     "console.subtitle":
-      "Panel unificado para rastreo, fusión OSINT, misiones de agentes y conciencia geoespacial.",
+      "",
     "console.metrics.service": "Servicio",
     "console.metrics.missions": "Misiones",
     "console.metrics.audit": "Eventos de auditoría",
     "console.metrics.layers": "Entidades geo",
     "console.quick": "Acciones rápidas",
     "console.market":
-      "Pila modular de producción: eventos, agentes multi-LLM, SSA/ADS-B en vivo, i18n, clima, FX, noticias, híbridos cuánticos.",
+      "",
     "scrape.title": "Motor de ciber-rastreo",
     "scrape.desc":
-      "Rastreo autoalojado con sesiones furtivas, robots, extracción estructurada y auditoría.",
+      "",
     "scrape.url": "URL objetivo",
     "scrape.deep": "Rastreo profundo mismo origen",
     "scrape.tier": "Nivel furtivo",
@@ -268,35 +262,35 @@ const packs: Partial<Record<LocaleCode, Partial<Catalog>>> = {
     "scrape.running": "Rastreando…",
     "osint.title": "Fusión de inteligencia ética",
     "osint.desc":
-      "Enriquecimiento de fuentes públicas: DNS DoH, transparencia de certificados, postura HTTP.",
+      "",
     "osint.query": "Consulta de dominio / entidad",
     "osint.run": "Ejecutar OSINT",
     "missions.title": "Enjambre de misiones Hermes",
     "missions.desc":
-      "Especialistas en paralelo + OpenClaw + LLM (Llama 3.1 / ChatGPT).",
+      "",
     "missions.launch": "Lanzar enjambre Hermes",
     "globe.title": "Ojo de Dios · Tierra en vivo",
     "globe.desc":
-      "TLE públicos derivados de NORAD (CelesTrak), ADS-B, hubs, gemelos, regiones.",
+      "",
     "globe.layers": "Capas y regiones",
     "audit.title": "Cadena de custodia",
     "audit.desc":
-      "Cada acción sensible se audita con contexto de operador y engagement.",
+      "",
     "events.title": "Flujo de eventos en vivo",
     "events.desc":
-      "Eventos reales del bus modular: rastreo, OSINT, agentes, geo, alertas, FX.",
+      "",
     "intel.title": "Noticias, Reddit y alertas globales",
     "intel.desc":
-      "Reddit, Hacker News y alertas sísmicas USGS fusionadas para operadores.",
+      "",
     "quantum.title": "Inteligencia cuántica híbrida",
     "quantum.desc":
-      "Híbridos estrechos seguros NISQ con sustitutos clásicos y KPIs de industria.",
+      "",
     "weather.title": "Clima a 7 días",
     "weather.desc":
-      "Pronóstico global Open-Meteo para planificación de misiones y operaciones regionales.",
+      "",
     "twins.title": "Gemelos digitales en vivo",
     "twins.desc":
-      "Gemelos SOC y de borde sincronizados con el globo en vivo.",
+      "",
     "ethics.lock": "Bloqueo ético",
     "ethics.body":
       "Solo OSINT autorizado y pruebas defensivas. Dark-web y operaciones profundas requieren atestación. Todo auditado.",
@@ -325,38 +319,38 @@ const packs: Partial<Record<LocaleCode, Partial<Catalog>>> = {
     "status.roe": "ROE REQUIS",
     "status.systems": "SYSTÈMES NOMINAUX",
     "home.hero":
-      "Commandement souverain pour OSINT éthique, crawl furtif et renseignement de mission.",
+      "HelixaraAI",
     "home.sub":
-      "Console modulaire de production : satellites live, ADS-B, agents Hermes & OpenClaw, entraînement Llama 3.1 / ChatGPT, hybrides quantiques, jumeaux, localisation complète.",
+      "",
     "home.cta.console": "Entrer dans la console",
     "home.cta.capabilities": "Matrice des capacités",
     "home.card.scrape": "Crawl furtif",
     "home.card.scrape.desc":
-      "Scraping dynamique furtif avec robots, proxies et audit natif.",
+      "",
     "home.card.osint": "OSINT éthique",
     "home.card.osint.desc":
-      "DNS, journaux CT, en-têtes. Dark web sous autorisation.",
+      "",
     "home.card.agents": "Hermes + OpenClaw",
     "home.card.agents.desc":
-      "Essaims multi-agents avec Ollama Llama 3.1 et ChatGPT.",
+      "",
     "home.card.globe": "Globe terrestre live",
     "home.card.globe.desc":
-      "Satellites CelesTrak NORAD GP, vols OpenSky, hubs, jumeaux, toutes régions.",
+      "",
     "home.scope":
-      "Périmètre strict : OSINT licite et tests de sécurité autorisés uniquement. Traductions site complet, flux live et crawl furtif de niveau entreprise.",
+      "",
     "console.title": "Vue de commandement",
     "console.subtitle":
-      "Tableau unifié crawl, fusion OSINT, missions agents et conscience géospatiale.",
+      "",
     "console.metrics.service": "Service",
     "console.metrics.missions": "Missions",
     "console.metrics.audit": "Événements d'audit",
     "console.metrics.layers": "Entités geo",
     "console.quick": "Actions rapides",
     "console.market":
-      "Stack modulaire production : événements, agents multi-LLM, SSA/ADS-B live, i18n, météo, FX, actus, quantique.",
+      "",
     "scrape.title": "Moteur de cyber-crawl",
     "scrape.desc":
-      "Crawl auto-hébergé avec sessions furtives, robots, extraction structurée, audit.",
+      "",
     "scrape.url": "URL cible",
     "scrape.deep": "Crawl profond même origine",
     "scrape.tier": "Niveau furtif",
@@ -364,35 +358,35 @@ const packs: Partial<Record<LocaleCode, Partial<Catalog>>> = {
     "scrape.running": "Crawl en cours…",
     "osint.title": "Fusion de renseignement éthique",
     "osint.desc":
-      "Enrichissement sources publiques : DNS DoH, transparence des certificats, posture HTTP.",
+      "",
     "osint.query": "Requête domaine / entité",
     "osint.run": "Lancer OSINT",
     "missions.title": "Essaim de mission Hermes",
     "missions.desc":
-      "Spécialistes parallèles + OpenClaw + LLM (Llama 3.1 / ChatGPT).",
+      "",
     "missions.launch": "Lancer l'essaim Hermes",
     "globe.title": "Œil de Dieu · Terre live",
     "globe.desc":
-      "TLE publics dérivés NORAD (CelesTrak), ADS-B, hubs, jumeaux, régions.",
+      "",
     "globe.layers": "Couches & régions",
     "audit.title": "Chaîne de custody",
     "audit.desc":
-      "Chaque action sensible est auditée avec contexte opérateur et engagement.",
+      "",
     "events.title": "Flux d'événements live",
     "events.desc":
-      "Événements réels du bus modulaire : crawl, OSINT, agents, geo, alertes, FX.",
+      "",
     "intel.title": "Actu, Reddit & alertes mondiales",
     "intel.desc":
-      "Reddit, Hacker News et alertes sismiques USGS pour opérateurs.",
+      "",
     "quantum.title": "Intelligence quantique hybride",
     "quantum.desc":
-      "Hybrides étroits NISQ-safe avec substituts classiques et KPI industrie.",
+      "",
     "weather.title": "Météo 7 jours",
     "weather.desc":
-      "Prévisions Open-Meteo mondiales pour planification de mission.",
+      "",
     "twins.title": "Jumeaux numériques live",
     "twins.desc":
-      "Jumeaux SOC et edge synchronisés avec le globe live.",
+      "",
     "ethics.lock": "Verrou éthique",
     "ethics.body":
       "OSINT autorisé et tests défensifs uniquement. Dark web et ops profondes sous attestation. Tout est audité.",
@@ -419,9 +413,9 @@ const de: Partial<Catalog> = {
   "nav.weather": "Wetter",
   "nav.twins": "Digitale Zwillinge",
   "home.hero":
-    "Souveränes Kommando für ethisches OSINT, Stealth-Crawl und Missionsintelligenz.",
+    "HelixaraAI",
   "home.sub":
-    "Modulare Produktionskonsole: Live-Satelliten, ADS-B, Hermes- & OpenClaw-Agenten, Llama 3.1 / ChatGPT-Training, Quantenhybride, digitale Zwillinge, vollständige Lokalisierung.",
+    "",
   "home.cta.console": "Kommando-Konsole öffnen",
   "scrape.execute": "Crawl starten",
   "missions.launch": "Hermes-Schwarm starten",
@@ -450,7 +444,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "Meteo",
     "nav.twins": "Gemelli digitali",
     "home.hero":
-      "Comando sovrano per OSINT etico, crawl stealth e intelligence di missione.",
+      "HelixaraAI",
     "home.cta.console": "Entra nella console",
     "scrape.execute": "Esegui crawl",
     "missions.launch": "Lancia sciame Hermes",
@@ -470,7 +464,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "Clima",
     "nav.twins": "Gêmeos digitais",
     "home.hero":
-      "Comando soberano para OSINT ético, crawl furtivo e inteligência de missão.",
+      "HelixaraAI",
     "home.cta.console": "Entrar no console",
     "common.language": "Idioma",
     "common.currency": "Moeda",
@@ -488,7 +482,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "Погода",
     "nav.twins": "Цифровые двойники",
     "home.hero":
-      "Суверенное командование для этичного OSINT, скрытого обхода и миссионной разведки.",
+      "HelixaraAI",
     "home.cta.console": "Открыть консоль",
     "common.language": "Язык",
     "common.currency": "Валюта",
@@ -508,9 +502,9 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.quantum": "量子混合",
     "nav.weather": "天气",
     "nav.twins": "数字孪生",
-    "home.hero": "用于合规 OSINT、隐秘爬取与任务情报的主权指挥控制台。",
+    "home.hero": "HelixaraAI",
     "home.sub":
-      "模块化生产控制台：实时卫星、ADS-B、Hermes 与 OpenClaw 智能体、Llama 3.1 / ChatGPT 训练、量子混合、数字孪生、完整本地化。",
+      "",
     "home.cta.console": "进入指挥控制台",
     "home.cta.capabilities": "能力矩阵",
     "scrape.execute": "执行爬取",
@@ -534,7 +528,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "天気",
     "nav.twins": "デジタルツイン",
     "home.hero":
-      "倫理的OSINT・ステルスクロール・ミッションインテリジェンスのための主権コマンド。",
+      "HelixaraAI",
     "home.cta.console": "コマンドコンソールへ",
     "common.language": "言語",
     "common.currency": "通貨",
@@ -552,7 +546,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "날씨",
     "nav.twins": "디지털 트윈",
     "home.hero":
-      "윤리적 OSINT, 스텔스 크롤, 미션 인텔리전스를 위한 주권 지휘 콘솔.",
+      "HelixaraAI",
     "home.cta.console": "지휘 콘솔 입장",
     "common.language": "언어",
     "common.currency": "통화",
@@ -570,7 +564,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "الطقس",
     "nav.twins": "توائم رقمية",
     "home.hero":
-      "قيادة سيادية لاستخبارات المصادر المفتوحة الأخلاقية والزحف المتخفي ومهام الاستخبارات.",
+      "HelixaraAI",
     "home.cta.console": "دخول وحدة التحكم",
     "common.language": "اللغة",
     "common.currency": "العملة",
@@ -588,7 +582,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "मौसम",
     "nav.twins": "डिजिटल ट्विन",
     "home.hero":
-      "नैतिक OSINT, स्टेल्थ क्रॉल और मिशन इंटेलिजेंस के लिए संप्रभु कमांड।",
+      "HelixaraAI",
     "home.cta.console": "कमांड कंसोल में जाएँ",
     "common.language": "भाषा",
     "common.currency": "मुद्रा",
@@ -606,7 +600,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "Weer",
     "nav.twins": "Digitale tweelingen",
     "home.hero":
-      "Soeverein commando voor ethische OSINT, stealth-crawl en missie-intelligence.",
+      "HelixaraAI",
     "home.cta.console": "Open commandoconsole",
     "common.language": "Taal",
     "common.currency": "Valuta",
@@ -624,7 +618,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "Pogoda",
     "nav.twins": "Cyfrowe bliźniaki",
     "home.hero":
-      "Suwerenne dowodzenie dla etycznego OSINT, stealth crawl i intel misji.",
+      "HelixaraAI",
     "home.cta.console": "Wejdź do konsoli",
     "common.language": "Język",
     "common.currency": "Waluta",
@@ -642,7 +636,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "Hava",
     "nav.twins": "Dijital ikizler",
     "home.hero":
-      "Etik OSINT, gizli tarama ve görev istihbaratı için egemen komuta.",
+      "HelixaraAI",
     "home.cta.console": "Komuta konsoluna gir",
     "common.language": "Dil",
     "common.currency": "Para birimi",
@@ -660,7 +654,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "Thời tiết",
     "nav.twins": "Song sinh số",
     "home.hero":
-      "Chỉ huy chủ quyền cho OSINT đạo đức, thu thập ẩn và tình báo nhiệm vụ.",
+      "HelixaraAI",
     "home.cta.console": "Vào bảng chỉ huy",
     "common.language": "Ngôn ngữ",
     "common.currency": "Tiền tệ",
@@ -678,7 +672,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "สภาพอากาศ",
     "nav.twins": "ดิจิทัลทวิน",
     "home.hero":
-      "บัญชาการอธิปไตยสำหรับ OSINT อย่างมีจริยธรรม การครawl ล่องหน และข่าวกรองภารกิจ",
+      "HelixaraAI",
     "home.cta.console": "เข้าคอนโซลบัญชาการ",
     "common.language": "ภาษา",
     "common.currency": "สกุลเงิน",
@@ -696,7 +690,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "Cuaca",
     "nav.twins": "Kembar digital",
     "home.hero":
-      "Komando berdaulat untuk OSINT etis, crawl siluman, dan intelijen misi.",
+      "HelixaraAI",
     "home.cta.console": "Masuk konsol komando",
     "common.language": "Bahasa",
     "common.currency": "Mata uang",
@@ -714,7 +708,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "Väder",
     "nav.twins": "Digitala tvillingar",
     "home.hero":
-      "Suveränt kommando för etisk OSINT, smygande crawl och uppdragsunderrättelse.",
+      "HelixaraAI",
     "home.cta.console": "Öppna kommandokonsolen",
     "common.language": "Språk",
     "common.currency": "Valuta",
@@ -732,7 +726,7 @@ const catalogs: Record<LocaleCode, Catalog> = {
     "nav.weather": "Погода",
     "nav.twins": "Цифрові двійники",
     "home.hero":
-      "Суверенне командування для етичного OSINT, прихованого обходу та розвідки місій.",
+      "HelixaraAI",
     "home.cta.console": "Увійти в консоль",
     "common.language": "Мова",
     "common.currency": "Валюта",

@@ -61,14 +61,9 @@ export default function GlobePage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-            Module · Geospatial 3D/4D Command
+            Geospatial
           </div>
-          <h1 className="text-2xl font-semibold">God&apos;s Eye Console</h1>
-          <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-            Real-world basemap (OpenStreetMap / CARTO). Live layers: NORAD TLE
-            satellites, OpenSky ADS-B, airport hubs, digital twins. Modes change
-            tile style only — geography stays real.
-          </p>
+          <h1 className="text-2xl font-semibold">Geospatial</h1>
         </div>
         <div className="flex flex-wrap gap-2">
           {modes.map((m) => (
