@@ -34,6 +34,7 @@ export type MessageKey =
   | "nav.command"
   | "nav.os"
   | "nav.consequence"
+  | "nav.worldview"
   | "nav.scrape"
   | "nav.osint"
   | "nav.agents"
@@ -121,6 +122,7 @@ const en: Catalog = {
   "nav.command": "Command",
   "nav.os": "Helixara OS",
   "nav.consequence": "Consequence AI",
+  "nav.worldview": "Worldview AI",
   "nav.scrape": "Stealth Crawl",
   "nav.osint": "OSINT",
   "nav.agents": "Agents",
