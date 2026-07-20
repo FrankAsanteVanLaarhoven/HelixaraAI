@@ -17,6 +17,7 @@ const bodySchema = z.object({
       "openai-chatgpt",
       "openrouter",
       "hermes-router",
+      "hermes-native",
       "openclaw",
     ])
     .optional(),

@@ -1,71 +1,54 @@
-# Hermes-style operator workflow (authorized)
+# Operator workflow — agents (authorized)
 
-This document maps patterns from public Hermes agent tutorials into **HelixaraAI** without importing illegal tradecraft.
+HelixaraAI multi-agent missions use local **hermes-agent** when installed, plus Helixara crawl/OSINT specialists.
 
-## What we adopt
+## What is integrated
 
-| Pattern from Hermes videos | HelixaraAI implementation |
-|----------------------------|---------------------------|
-| Multi-agent parallel work | Hermes swarm + Kanban ready queue |
+| Capability | Helixara surface |
+|------------|------------------|
+| Multi-agent parallel work | Swarm + Kanban |
+| Free models (Llama 3.1 / ensemble) | `hermes-native` provider |
 | Parent → child handoff | Kanban `parentId` / `childrenIds` |
 | Board: todo / ready / in progress / blocked / done | `/console/kanban` |
 | Telegram mobile control | `/api/v1/telegram/webhook` + allowlisted user |
-| OpenRouter model routing | `OPENROUTER_API_KEY` + provider `openrouter` |
-| Always-on cloud worker | Deploy HelixaraAI on your VPS (Docker/Node) |
+| OpenRouter (optional paid/free cloud) | `OPENROUTER_API_KEY` |
+| Always-on worker | Deploy HelixaraAI on your VPS |
 
 ## What we refuse
 
 - SMS sender spoofing / smishing
-- Brand-impersonation phishing pages (e.g. fake package tracking)
+- Brand-impersonation phishing pages
 - Covert geolocation of third parties without consent / warrant / ROE
-- Unrestricted “uncensored hacking team” automation against arbitrary targets
+- Unrestricted attack automation against arbitrary targets
 
-Those activities are illegal in most jurisdictions without explicit authorization and are **blocked by ethics gates** in Kanban and Telegram handlers.
-
-## Legitimate use cases
-
-- Authorized pentest recon (scope in ROE)
-- Public OSINT enrichment
-- Stealth crawl of **owned / permitted** assets
-- Incident response research
-- Security team task orchestration via Telegram for **operators only**
+Blocked by ethics gates in Kanban and Telegram handlers.
 
 ## Environment
 
 ```bash
-# OpenRouter (same idea as Hermes cloud brain)
-OPENROUTER_API_KEY=sk-or-...
-OPENROUTER_MODEL=openrouter/auto   # or a free model id from openrouter.ai/models
+# Local hermes-agent (Desktop tree)
+export HERMES_AGENT_ROOT=$HOME/Desktop/hermes-agent-main
+export HERMES_FREE_MODEL=free
+npm run hermes:install
+npm run hermes:bridge
 
-# Telegram operator bot (BotFather)
-TELEGRAM_BOT_TOKEN=123456:ABC...
-TELEGRAM_ALLOWED_USER_ID=your_numeric_user_id
+# Free local weights
+ollama pull llama3.1
 
-# Optional: external OpenClaw / Hermes gateway on another host
-OPENCLAW_GATEWAY_URL=http://127.0.0.1:18789
+# Optional cloud
+# OPENROUTER_API_KEY=...
+# OPENAI_API_KEY=...
+
+# Optional external OpenClaw
+# OPENCLAW_GATEWAY_URL=http://127.0.0.1:18789
 ```
 
-### Telegram webhook
-
-1. Create bot with BotFather; copy token.
-2. Get your user id (e.g. `@userinfobot`).
-3. Set env vars above.
-4. Point webhook:
+## Launch mission
 
 ```bash
-curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
-  -d "url=https://YOUR_PUBLIC_HOST/api/v1/telegram/webhook"
+curl -s -X POST http://127.0.0.1:3007/api/v1/hermes \
+  -H 'content-type: application/json' \
+  -d '{"name":"Scope recon","objective":"Public DNS/HTTP posture","target":"example.com","provider":"hermes-native","freeModel":"free"}'
 ```
 
-Commands: `/help` `/status` `/board` `/osint example.com` `/hermes example.com` `/task Title | prompt` `/run`
-
-## External Hermes VPS
-
-You may still run official Hermes Agent on a separate Hostinger/VPS instance for general automation. Point its tools at HelixaraAI APIs for **defensive** jobs only:
-
-- `POST /api/v1/osint`
-- `POST /api/v1/scrape`
-- `POST /api/v1/hermes`
-- `POST /api/v1/kanban`
-
-Do not wire HelixaraAI to smishing or phishing skills.
+UI: `/console/missions`

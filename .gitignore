@@ -45,3 +45,7 @@ next-env.d.ts
 /data/
 !/data/.gitkeep
 *.db
+
+# hermes-agent local runtime (venv + home; source stays on Desktop)
+.runtime/
+integrations/hermes/*.log

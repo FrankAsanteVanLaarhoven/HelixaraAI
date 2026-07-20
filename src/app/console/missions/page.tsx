@@ -35,13 +35,13 @@ type Provider = {
 
 export default function MissionsPage() {
   const { t } = useI18n();
-  const [name, setName] = useState("Hermes surface recon");
+  const [name, setName] = useState("Surface recon");
   const [objective, setObjective] = useState(
     "Authorized public footprint assessment for defensive hardening"
   );
   const [target, setTarget] = useState("example.com");
-  const [provider, setProvider] = useState("auto");
-  const [useOpenClaw, setUseOpenClaw] = useState(true);
+  const [provider, setProvider] = useState("hermes-native");
+  const [useOpenClaw, setUseOpenClaw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [active, setActive] = useState<Run | null>(null);
   const [list, setList] = useState<Run[]>([]);
@@ -139,11 +139,12 @@ export default function MissionsPage() {
             value={provider}
             onChange={(e) => setProvider(e.target.value)}
           >
-            <option value="auto">auto (Ollama → OpenRouter → ChatGPT → Hermes)</option>
+            <option value="hermes-native">hermes-agent free (local)</option>
+            <option value="auto">auto (native free → Ollama → cloud)</option>
             <option value="ollama-llama31">Ollama · Llama 3.1 local</option>
-            <option value="openrouter">OpenRouter (100+ models)</option>
-            <option value="openai-chatgpt">OpenAI · ChatGPT</option>
-            <option value="hermes-router">Hermes router only</option>
+            <option value="openrouter">OpenRouter</option>
+            <option value="openai-chatgpt">OpenAI</option>
+            <option value="hermes-router">Helixara router only</option>
             <option value="openclaw">OpenClaw gateway</option>
           </select>
         </div>
@@ -164,7 +165,7 @@ export default function MissionsPage() {
             ) : (
               <Play className="h-4 w-4" />
             )}
-            {loading ? "Hermes running…" : t("missions.launch")}
+            {loading ? "Running…" : t("missions.launch")}
           </button>
         </div>
       </div>

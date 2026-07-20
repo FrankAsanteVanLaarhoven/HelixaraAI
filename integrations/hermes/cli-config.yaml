@@ -1,0 +1,64 @@
+# HelixaraAI → hermes-agent runtime config
+# Free models first. Local install only — no upstream fork/contribution.
+# Source tree: HERMES_AGENT_ROOT (default Desktop path)
+
+model:
+  # Default free model (Ollama local)
+  default: "llama3.1"
+  provider: "custom"
+  base_url: "http://127.0.0.1:11434/v1"
+  # Ollama ignores key but hermes OpenAI client expects a non-empty string
+  api_key: "ollama"
+  context_length: 32768
+  max_tokens: 2048
+
+# Free model aliases (Helixara models registered as free)
+model_aliases:
+  free:
+    model: "llama3.1"
+    provider: custom
+    base_url: "http://127.0.0.1:11434/v1"
+  helixara-free:
+    model: "llama3.1"
+    provider: custom
+    base_url: "http://127.0.0.1:11434/v1"
+  llama31:
+    model: "llama3.1"
+    provider: custom
+    base_url: "http://127.0.0.1:11434/v1"
+  llama31-free:
+    model: "llama3.1"
+    provider: custom
+    base_url: "http://127.0.0.1:11434/v1"
+  llama32-free:
+    model: "llama3.2"
+    provider: custom
+    base_url: "http://127.0.0.1:11434/v1"
+  ollama-free:
+    model: "llama3.1"
+    provider: custom
+    base_url: "http://127.0.0.1:11434/v1"
+  # Helixara internal free ensemble (bridge maps this when Ollama offline)
+  helixara-ensemble:
+    model: "helixara-ensemble"
+    provider: custom
+    base_url: "http://127.0.0.1:3007/api/v1/llm-proxy"
+  openrouter-free:
+    model: "openrouter/free"
+    provider: openrouter
+
+display:
+  branding:
+    agent_name: "Helixara Agent"
+    welcome: "HelixaraAI mission agent"
+    response_label: " Helixara "
+    prompt_symbol: "›"
+
+# Defensive tool posture for Helixara SOC use
+agent:
+  max_iterations: 24
+  quiet_mode: true
+
+# Terminal: local only (authorized environments)
+terminal:
+  backend: local

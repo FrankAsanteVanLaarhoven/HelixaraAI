@@ -3,11 +3,15 @@ import { probeProviders } from "@/modules/llm/providers";
 import { eventStats } from "@/modules/events/bus";
 import { quantumCapabilityReport } from "@/modules/quantum/hybrid";
 import { LOCALES } from "@/modules/i18n/locales";
+import { getHermesNativeStatus } from "@/modules/agents/hermesNative";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const providers = await probeProviders();
+  const [providers, hermesNative] = await Promise.all([
+    probeProviders(),
+    getHermesNativeStatus(),
+  ]);
   return NextResponse.json({
     status: "ok",
     service: "helixaraai",
@@ -19,6 +23,13 @@ export async function GET() {
       scrape: true,
       osint: true,
       hermes: true,
+      hermesNative: {
+        ok: hermesNative.ok,
+        version: hermesNative.version,
+        freeModels: hermesNative.freeModels?.map((m) => m.id),
+        bridgeMode: hermesNative.bridgeMode,
+        ollama: hermesNative.ollama,
+      },
       openclaw: true,
       llm: providers.map((p) => ({ id: p.id, available: p.available })),
       geospatialLive: true,

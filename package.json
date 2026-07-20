@@ -8,7 +8,11 @@
     "dev:3007": "next dev -p 3007",
     "build": "next build",
     "start": "next start -p 3007",
-    "lint": "next lint"
+    "lint": "next lint",
+    "hermes:install": "bash integrations/hermes/install.sh",
+    "hermes:bridge": "bash integrations/hermes/start-bridge.sh",
+    "hermes:status": ".runtime/hermes-venv/bin/python integrations/hermes/bridge.py status",
+    "hermes:models": ".runtime/hermes-venv/bin/python integrations/hermes/bridge.py models"
   },
   "dependencies": {
     "cheerio": "^1.2.0",

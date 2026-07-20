@@ -1,6 +1,6 @@
 /**
- * Hermes-style multi-agent parallel execution for HelixaraAI.
- * Specialists fan out, then commander synthesizes — optional LLM backbone.
+ * Multi-agent parallel execution for HelixaraAI.
+ * Uses local hermes-agent when available, plus Helixara specialists.
  */
 
 import { completeLLM, LLMProviderId } from "@/modules/llm/providers";
@@ -9,6 +9,10 @@ import { scrapeUrl } from "@/lib/crawl/engine";
 import { runOsint } from "@/lib/osint/collectors";
 import { demoOperator } from "@/lib/ethics/guardrails";
 import { uid } from "@/lib/utils";
+import {
+  getHermesNativeStatus,
+  runHermesNative,
+} from "@/modules/agents/hermesNative";
 
 export type HermesRole =
   | "commander"
@@ -16,7 +20,8 @@ export type HermesRole =
   | "osint"
   | "analyst"
   | "scribe"
-  | "openclaw";
+  | "openclaw"
+  | "hermes-native";
 
 export interface HermesAgentResult {
   role: HermesRole;
@@ -156,17 +161,69 @@ export async function runHermesSwarm(input: {
   const [recon, osint] = await Promise.all([reconPromise, osintPromise]);
   agents.push(recon, osint);
 
-  // Commander plan via LLM
+  // Native hermes-agent free model pass (when installed)
+  const nativeStatus = await getHermesNativeStatus();
+  if (nativeStatus.ok || nativeStatus.importOk) {
+    const t0 = Date.now();
+    try {
+      const native = await runHermesNative({
+        model: process.env.HERMES_FREE_MODEL || "free",
+        system:
+          "You are HelixaraAI mission agent powered by hermes-agent. Authorized defensive OSINT only. Concise plan + risk notes. No exploits.",
+        prompt: `Mission: ${input.name}\nObjective: ${input.objective}\nTarget: ${input.target || "n/a"}\nRecon: ${recon.output}\nOSINT: ${osint.output}`,
+        maxIterations: 6,
+      });
+      agents.push({
+        role: "hermes-native",
+        status: native.ok || native.content ? "completed" : "failed",
+        output: native.content || native.error || "no output",
+        ms: Date.now() - t0,
+        artifacts: {
+          provider: native.provider,
+          model: native.model,
+          tier: native.tier || "free",
+          engine: native.engine,
+          fallback: native.fallback,
+        },
+      });
+      emitEvent({
+        type: "agent.task",
+        source: "hermes.native",
+        severity: "info",
+        title: "hermes-agent free model pass complete",
+        payload: { model: native.model, fallback: native.fallback },
+      });
+    } catch (e) {
+      agents.push({
+        role: "hermes-native",
+        status: "failed",
+        output: e instanceof Error ? e.message : "native failed",
+        ms: Date.now() - t0,
+      });
+    }
+  }
+
+  // Commander plan via LLM (prefers hermes-native free models)
   {
     const t0 = Date.now();
+    const preferNative =
+      provider === "auto" ||
+      provider === "hermes-native" ||
+      provider === "hermes-router";
     const llm = await completeLLM({
-      provider: provider === "auto" ? undefined : provider,
+      provider:
+        provider === "auto"
+          ? preferNative
+            ? "hermes-native"
+            : undefined
+          : provider,
       purpose: "agent_plan",
+      model: process.env.HERMES_FREE_MODEL || "free",
       messages: [
         {
           role: "system",
           content:
-            "You are the Hermes commander for HelixaraAI. Authorized defensive OSINT only. Produce a concise mission plan and risk notes. No exploits.",
+            "You are the mission commander for HelixaraAI. Authorized defensive OSINT only. Produce a concise mission plan and risk notes. No exploits.",
         },
         {
           role: "user",

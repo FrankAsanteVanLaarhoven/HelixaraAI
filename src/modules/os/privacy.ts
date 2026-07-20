@@ -40,13 +40,14 @@ export function privacyPolicy() {
         label: "Vault",
         description:
           "Local Ollama only. Client data, health, finances, proprietary IP stay on-box. Works offline.",
-        providers: ["ollama-llama31", "hermes-router"],
+        providers: ["ollama-llama31", "hermes-native", "hermes-router"],
       },
       hybrid: {
         label: "Hybrid",
         description:
           "Prefer local models; fall back to cloud with audit trail when needed.",
         providers: [
+          "hermes-native",
           "ollama-llama31",
           "openrouter",
           "openai-chatgpt",
@@ -59,6 +60,7 @@ export function privacyPolicy() {
         description:
           "Performance mode — OpenRouter / ChatGPT / OpenClaw allowed for max quality & web context.",
         providers: [
+          "hermes-native",
           "ollama-llama31",
           "openrouter",
           "openai-chatgpt",
@@ -76,7 +78,7 @@ export function assertProviderAllowed(
   provider: string
 ): { ok: true } | { ok: false; reason: string } {
   if (mode !== "vault") return { ok: true };
-  const local = ["ollama-llama31", "hermes-router", "auto"];
+  const local = ["ollama-llama31", "hermes-native", "hermes-router", "auto"];
   if (local.includes(provider)) return { ok: true };
   return {
     ok: false,
