@@ -65,9 +65,9 @@ export default function GlobePage() {
           </div>
           <h1 className="text-2xl font-semibold">God&apos;s Eye Console</h1>
           <p className="mt-1 max-w-2xl text-sm text-[var(--lm-muted)]">
-            Multi-layer situational awareness. Demo feeds for satellites, ADS-B,
-            AIS, and threat pins — swap adapters for production OpenSky / AIS /
-            TLE sources. 4D reconstruction pipeline is on the roadmap.
+            Real-world basemap (OpenStreetMap / CARTO). Live layers: NORAD TLE
+            satellites, OpenSky ADS-B, airport hubs, digital twins. Modes change
+            tile style only — geography stays real.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
