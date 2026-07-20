@@ -598,14 +598,41 @@ export default function RedTeamPage() {
           </div>
 
           <div className="lm-panel rounded-lg p-3 text-[11px] leading-relaxed text-[var(--lm-muted)]">
-            <strong className="text-[var(--lm-text)]">Not included</strong>
-            <ul className="mt-1 list-inside list-disc space-y-0.5">
-              <li>Exploit / payload kits</li>
-              <li>Phishing / SMS spoof</li>
-              <li>Deauth / RF inject</li>
-              <li>ATT&amp;CK campaign runner</li>
-              <li>Purple-team boards</li>
-              <li>Separate Red/Blue workspaces</li>
+            <strong className="text-[var(--lm-text)]">Ethical labs</strong>
+            <p className="mt-1 text-amber-200/80">
+              Accept usage notice on each lab. Ethical hacking only — live weaponization blocked.
+            </p>
+            <ul className="mt-2 space-y-1">
+              <li>
+                <a className="text-cyan-300" href="/console/redteam/kits">
+                  Kits (CVE / detection)
+                </a>
+              </li>
+              <li>
+                <a className="text-cyan-300" href="/console/redteam/awareness">
+                  Phishing / SMS awareness SIM
+                </a>
+              </li>
+              <li>
+                <a className="text-cyan-300" href="/console/redteam/rf-sim">
+                  Deauth software sim → WIDS
+                </a>
+              </li>
+              <li>
+                <a className="text-cyan-300" href="/console/redteam/attack">
+                  ATT&amp;CK tabletop campaigns
+                </a>
+              </li>
+              <li>
+                <a className="text-cyan-300" href="/console/redteam/purple">
+                  Purple board
+                </a>
+              </li>
+              <li>
+                <a className="text-cyan-300" href="/console/redteam/workspace?side=red">
+                  Red / Blue / Purple workspaces
+                </a>
+              </li>
             </ul>
           </div>
         </div>

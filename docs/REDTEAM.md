@@ -1,31 +1,37 @@
-# Red Team module (ROE recon only)
+# Red Team + ethical hacking labs
 
-HelixaraAI Red Team is **scoped engagement management** for authorized recon, public OSINT, lab observation, and reporting.
+HelixaraAI Red Team manages **ROE-scoped engagements** and ethical-hacking labs.
 
-## Included
+## Operator flow (engagements)
 
-- Nav: `/console/redteam`
-- API: `/api/v1/redteam`
-- Roster (lead, recon, osint, analyst, scribe, observer)
-- Engagement types: external recon, internal lab, web surface, wireless lab observe, reporting only
-- ROE attestation gate before recon cycles
-- Run path: OSINT → surface crawl → optional hermes swarm → report
+1. Create engagement (type + target + objective)  
+2. Attest ROE  
+3. Run recon cycle  
+4. Review findings + report  
+5. Close  
 
-## Explicitly excluded
+Offensive language in objectives is still blocked on the recon runner.
 
-- Exploit / payload kits
-- Phishing / SMS spoof
-- Deauth / RF inject / jamming
-- ATT&CK campaign runners / offensive TTP libraries
-- Purple-team exercise boards
-- Separate Red vs Blue workspaces
+## Ethical labs (usage message required)
 
-## Operator flow
+Every lab under `/console/redteam/*` requires typing:
 
-1. Create engagement (type + target + objective)
-2. Attest ROE (id, legal basis, scope, expiry)
-3. **Run recon cycle**
-4. Review findings + report
-5. Close engagement
+`I ACCEPT ETHICAL HACKING ONLY`
 
-All runs are audited. Offensive language in objectives is blocked.
+| Lab | Path | What it does | Permanently disabled |
+|-----|------|--------------|----------------------|
+| Kits | `/console/redteam/kits` | CVE awareness, detection, remediation | Live exploit/payload generation |
+| Awareness | `/console/redteam/awareness` | Phishing/SMS **SIM previews** | Live phishing host, SMS spoof/send |
+| RF sim | `/console/redteam/rf-sim` | Software deauth events → WIDS | OTA deauth / RF inject / jam |
+| ATT&CK | `/console/redteam/attack` | TTP library + tabletop/recon campaign plans | Live exploit chains |
+| Purple | `/console/redteam/purple` | Red plan vs Blue detect board | Live attack orchestration |
+| Workspaces | `/console/redteam/workspace` | Separate Red / Blue / Purple views | Isolated weaponized sandboxes |
+
+## API
+
+- Engagements: `/api/v1/redteam`  
+- Ethical labs: `/api/v1/ethical?section=usage|kits|awareness|rf|attack|purple|workspace`
+
+## Legal
+
+Authorized ethical hacking and defensive security testing only. Operators must hold ROE/SOW for every target.

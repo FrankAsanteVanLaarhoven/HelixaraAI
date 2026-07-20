@@ -1,7 +1,7 @@
 /**
- * Red Team engagement model — ROE-scoped recon / OSINT / reporting only.
- * Explicitly excludes offensive kits, ATT&CK campaign runners, purple boards,
- * and separate Red/Blue workspaces.
+ * Red Team engagement model — ROE-scoped recon / OSINT / reporting.
+ * Expanded ethical labs live under /console/redteam/* with usage acceptance.
+ * Live weaponization remains disabled (see modules/ethical/*).
  */
 
 export type EngagementType =

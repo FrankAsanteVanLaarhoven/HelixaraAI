@@ -39,6 +39,12 @@ export type MessageKey =
   | "nav.osint"
   | "nav.agents"
   | "nav.redteam"
+  | "nav.rtKits"
+  | "nav.rtAware"
+  | "nav.rtRf"
+  | "nav.rtAttack"
+  | "nav.rtPurple"
+  | "nav.rtWs"
   | "nav.kanban"
   | "nav.telemetry"
   | "nav.wireless"
@@ -128,6 +134,12 @@ const en: Catalog = {
   "nav.osint": "OSINT",
   "nav.agents": "Agents",
   "nav.redteam": "Red Team",
+  "nav.rtKits": "RT Kits",
+  "nav.rtAware": "RT Awareness",
+  "nav.rtRf": "RT RF Sim",
+  "nav.rtAttack": "RT ATT&CK",
+  "nav.rtPurple": "Purple Board",
+  "nav.rtWs": "Red/Blue WS",
   "nav.kanban": "Kanban Team",
   "nav.telemetry": "Telemetry Map",
   "nav.wireless": "Wi‑Fi Lab",
