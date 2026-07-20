@@ -41,6 +41,7 @@ export type MessageKey =
   | "nav.wireless"
   | "nav.wids"
   | "nav.labwifi"
+  | "nav.wifiadmin"
   | "nav.globe"
   | "nav.audit"
   | "nav.capabilities"
@@ -126,6 +127,7 @@ const en: Catalog = {
   "nav.wireless": "Wi‑Fi Lab",
   "nav.wids": "WIDS Deauth",
   "nav.labwifi": "Lab Sim",
+  "nav.wifiadmin": "Wi‑Fi Admin",
   "nav.globe": "Geospatial",
   "nav.audit": "Audit",
   "nav.capabilities": "Capabilities",

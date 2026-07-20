@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import {
+  getDeviceVisibility,
+  getEventTimeline,
   ingestWidsFrames,
   listRecentFrames,
   listWidsAlerts,
@@ -9,10 +11,16 @@ import {
 } from "@/modules/wireless/wids";
 import { appendAudit } from "@/lib/audit/logger";
 import { demoOperator } from "@/lib/ethics/guardrails";
+import {
+  authorisedUseBanner,
+  loadWifiAdmin,
+  offensiveCapabilities,
+} from "@/modules/wireless/admin";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
+  await loadWifiAdmin();
   const limit = Math.min(
     200,
     Number(req.nextUrl.searchParams.get("limit") || 50)
@@ -21,6 +29,11 @@ export async function GET(req: NextRequest) {
     status: widsStatus(),
     alerts: listWidsAlerts(limit),
     frames: listRecentFrames(Math.min(100, limit)),
+    devices: getDeviceVisibility(40),
+    timeline: getEventTimeline(80),
+    offensive: offensiveCapabilities(),
+    boundaries: authorisedUseBanner(),
+    mitigation: widsStatus().mitigationPlaybook,
   });
 }
 
@@ -65,7 +78,7 @@ export async function POST(req: NextRequest) {
       action: "wids.ingest",
       allowed: true,
       risk: "low",
-      severity: "info",
+      severity: result.rateLimited ? "warn" : "info",
       engagementId: operator.engagementId,
       details: result,
     });
@@ -74,6 +87,8 @@ export async function POST(req: NextRequest) {
       ...result,
       status: widsStatus(),
       alerts: listWidsAlerts(20),
+      devices: getDeviceVisibility(20),
+      timeline: getEventTimeline(40),
     });
   } catch (err) {
     return NextResponse.json(

@@ -4,13 +4,21 @@ import { labSimCatalog, runLabSimulation } from "@/modules/wireless/lab_sim";
 import { listWidsAlerts } from "@/modules/wireless/wids";
 import { appendAudit } from "@/lib/audit/logger";
 import { demoOperator } from "@/lib/ethics/guardrails";
+import {
+  authorisedUseBanner,
+  checkLabSimRateLimit,
+  offensiveCapabilities,
+} from "@/modules/wireless/admin";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   return NextResponse.json({
-    catalog: labSimCatalog(),
+    catalog: await labSimCatalog(),
     recentAlerts: listWidsAlerts(15),
+    rateLimit: checkLabSimRateLimit(),
+    offensive: offensiveCapabilities(),
+    boundaries: authorisedUseBanner(),
   });
 }
 
@@ -21,6 +29,7 @@ const runSchema = z.object({
     "sim.disassoc.storm",
     "sim.benign.roam",
     "sim.mixed.noise",
+    "sim.disconnect.repeated_client",
   ]),
   engagementId: z.string().min(2),
   legalBasis: z.string().min(4),
@@ -43,7 +52,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = runLabSimulation(parsed.data);
+    const result = await runLabSimulation(parsed.data);
 
     await appendAudit({
       operatorId: operator.operatorId,
@@ -54,7 +63,8 @@ export async function POST(req: NextRequest) {
       engagementId: parsed.data.engagementId,
       details: {
         scenario: parsed.data.scenario,
-        injectMode: parsed.data.injectMode || "bus",
+        injectMode: "bus",
+        ota: false,
         ok: result.ok,
         error: result.error,
         framesGenerated: result.framesGenerated,
@@ -66,7 +76,8 @@ export async function POST(req: NextRequest) {
       {
         ...result,
         alerts: listWidsAlerts(15),
-        catalog: labSimCatalog(),
+        catalog: await labSimCatalog(),
+        offensive: offensiveCapabilities(),
       },
       { status: result.ok ? 200 : 400 }
     );

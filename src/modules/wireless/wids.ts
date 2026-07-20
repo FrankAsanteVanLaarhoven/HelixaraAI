@@ -6,6 +6,11 @@
 
 import { emitEvent } from "@/modules/events/bus";
 import { uid } from "@/lib/utils";
+import {
+  checkWidsIngestRate,
+  getWifiAdminSync,
+  recordWidsIngest,
+} from "@/modules/wireless/admin";
 
 export type MgmtFrameType = "deauth" | "disassoc" | "other_mgmt";
 
@@ -83,21 +88,132 @@ export function listRecentFrames(limit = 100): WidsFrameEvent[] {
   return frameBuffer.slice(0, limit);
 }
 
+export function getDeviceVisibility(limit = 40) {
+  const byDevice = new Map<
+    string,
+    {
+      mac: string;
+      role: "client" | "transmitter" | "ap";
+      deauthRx: number;
+      deauthTx: number;
+      disassoc: number;
+      lastSeen: string;
+      bssids: Set<string>;
+    }
+  >();
+
+  const bump = (
+    mac: string,
+    role: "client" | "transmitter" | "ap",
+    field: "deauthRx" | "deauthTx" | "disassoc",
+    ts: string,
+    bssid: string
+  ) => {
+    const m = mac.toLowerCase();
+    if (!byDevice.has(m)) {
+      byDevice.set(m, {
+        mac: m,
+        role,
+        deauthRx: 0,
+        deauthTx: 0,
+        disassoc: 0,
+        lastSeen: ts,
+        bssids: new Set(),
+      });
+    }
+    const d = byDevice.get(m)!;
+    d[field]++;
+    d.lastSeen = ts;
+    d.bssids.add(bssid);
+  };
+
+  for (const f of frameBuffer.slice(0, 2000)) {
+    if (f.type === "deauth") {
+      bump(f.receiver, "client", "deauthRx", f.ts, f.bssid);
+      bump(f.transmitter, "transmitter", "deauthTx", f.ts, f.bssid);
+    } else if (f.type === "disassoc") {
+      bump(f.receiver, "client", "disassoc", f.ts, f.bssid);
+      bump(f.transmitter, "transmitter", "disassoc", f.ts, f.bssid);
+    }
+    bump(f.bssid, "ap", "deauthRx", f.ts, f.bssid);
+  }
+
+  return Array.from(byDevice.values())
+    .map((d) => ({
+      mac: d.mac,
+      role: d.role,
+      deauthRx: d.deauthRx,
+      deauthTx: d.deauthTx,
+      disassoc: d.disassoc,
+      lastSeen: d.lastSeen,
+      bssids: Array.from(d.bssids),
+      risk:
+        d.deauthRx >= 6 || d.deauthTx >= 8
+          ? "elevated"
+          : d.deauthRx > 0
+            ? "watch"
+            : "normal",
+    }))
+    .sort(
+      (a, b) => b.deauthRx + b.deauthTx + b.disassoc - (a.deauthRx + a.deauthTx + a.disassoc)
+    )
+    .slice(0, limit);
+}
+
+export function getEventTimeline(limit = 80) {
+  const items: {
+    ts: string;
+    kind: "frame" | "alert";
+    summary: string;
+    severity?: string;
+  }[] = [];
+
+  for (const a of alerts.slice(0, 40)) {
+    items.push({
+      ts: a.ts,
+      kind: "alert",
+      summary: `${a.ruleId}: ${a.title}`,
+      severity: a.severity,
+    });
+  }
+  for (const f of frameBuffer.slice(0, 40)) {
+    items.push({
+      ts: f.ts,
+      kind: "frame",
+      summary: `${f.type} ${f.transmitter} → ${f.receiver} @ ${f.bssid}`,
+    });
+  }
+  return items
+    .sort((a, b) => +new Date(b.ts) - +new Date(a.ts))
+    .slice(0, limit);
+}
+
 export function widsStatus() {
+  const admin = getWifiAdminSync();
   return {
-    enabled: process.env.HELIXARA_WIFI_MODULE !== "off",
-    mode: "detection-only",
+    enabled: admin.moduleEnabled,
+    mode: "detection-and-incident-response-only",
     transmitsFrames: false,
+    offensive: {
+      packetInjection: false,
+      deauthTx: false,
+      jamming: false,
+    },
     rules: getWidsConfig(),
     framesBuffered: frameBuffer.length,
     alertCount: alerts.length,
+    rateLimit: {
+      ingestPerMinute: admin.widsIngestPerMinute,
+    },
     legal:
-      "Defensive monitoring of authorised networks only. UK Computer Misuse Act 1990: unauthorised acts impairing systems (including wireless disruption) are criminal. This module detects; it does not attack.",
-    recommendationsBaseline: [
-      "Enable 802.11w / PMF where client ecosystem allows",
-      "Alert SOC on DEAUTH-FLOOD-* critical/high",
-      "Correlate with rogue AP and physical security",
-      "Do not respond with deauth counter-attacks",
+      "Defensive monitoring of authorised networks only. UK Computer Misuse Act 1990: unauthorised acts impairing systems (including wireless disruption) can be criminal. This module detects and guides response; it does not attack.",
+    mitigationPlaybook: [
+      "Enable 802.11w / PMF (Protected Management Frames) where clients support it",
+      "Page SOC on DEAUTH-FLOOD-* / DISASSOC-FLOOD critical/high",
+      "Correlate with rogue AP surveys and physical security",
+      "Capture sensor evidence; preserve audit trail",
+      "Do NOT counter-deauth or jam — out of product scope and legally hazardous",
+      "Segment critical clients; investigate multi-client bursts as area denial",
     ],
   };
 }
@@ -243,13 +359,29 @@ function evaluate(bssid: string, cfg: WidsRuleConfig) {
   }
 }
 
-/** Ingest one or more management-frame summary events */
+/** Ingest one or more management-frame summary events (detection plane only) */
 export function ingestWidsFrames(
   events: WidsFrameEvent[],
   opts?: { requireEngagement?: boolean }
-): { accepted: number; rejected: number; alerts: WidsAlert[] } {
-  if (process.env.HELIXARA_WIFI_MODULE === "off") {
+): {
+  accepted: number;
+  rejected: number;
+  rateLimited?: boolean;
+  alerts: WidsAlert[];
+} {
+  const admin = getWifiAdminSync();
+  if (!admin.moduleEnabled || process.env.HELIXARA_WIFI_MODULE === "off") {
     return { accepted: 0, rejected: events.length, alerts: [] };
+  }
+
+  const rate = checkWidsIngestRate(events.length);
+  if (!rate.ok) {
+    return {
+      accepted: 0,
+      rejected: events.length,
+      rateLimited: true,
+      alerts: [],
+    };
   }
 
   let accepted = 0;
@@ -257,6 +389,7 @@ export function ingestWidsFrames(
   const before = alerts.length;
   const cfg = getWidsConfig();
   const bssids = new Set<string>();
+  const clientHits = new Map<string, number>();
 
   for (const raw of events) {
     if (opts?.requireEngagement && !raw.engagementId) {
@@ -278,15 +411,44 @@ export function ingestWidsFrames(
     frameBuffer.unshift(ev);
     accepted++;
     bssids.add(ev.bssid);
+    if (ev.type === "deauth" && ev.receiver !== BROADCAST) {
+      clientHits.set(ev.receiver, (clientHits.get(ev.receiver) || 0) + 1);
+    }
   }
 
+  recordWidsIngest(accepted);
   if (frameBuffer.length > MAX_FRAMES) frameBuffer.length = MAX_FRAMES;
   for (const b of bssids) evaluate(b, cfg);
+
+  // Repeated client disconnect pattern
+  for (const [client, n] of clientHits) {
+    if (n >= cfg.unicastDeauthThreshold) {
+      const sample = frameBuffer.find(
+        (f) => f.type === "deauth" && normMac(f.receiver) === client
+      );
+      if (sample) {
+        pushAlert({
+          ruleId: "CLIENT-DISCONNECT-REPEAT",
+          severity: "medium",
+          title: `Repeated client disconnect pattern · ${client}`,
+          detail: `${n} deauth-related hits on client in ingest batch / window`,
+          bssid: sample.bssid,
+          count: n,
+          windowSec: cfg.windowSec,
+          sampleReceivers: [client],
+          engagementId: sample.engagementId,
+          sensorId: sample.sensorId,
+          recommendation:
+            "IR: verify client impact; check for targeted harassment deauth; enable PMF; do not TX counter-frames.",
+        });
+      }
+    }
+  }
 
   return {
     accepted,
     rejected,
-    alerts: alerts.slice(0, Math.max(0, alerts.length - before + 5)),
+    alerts: alerts.slice(0, Math.max(0, alerts.length - before + 8)),
   };
 }
 

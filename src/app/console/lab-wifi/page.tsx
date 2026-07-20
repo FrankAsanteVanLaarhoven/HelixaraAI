@@ -3,48 +3,50 @@
 import { useCallback, useEffect, useState } from "react";
 import { FlaskConical, Loader2, Play } from "lucide-react";
 
-type Scenario = {
-  id: string;
-  name: string;
-  description: string;
-};
-
+type Scenario = { id: string; name: string; description: string };
 type Catalog = {
   labModeEnabled: boolean;
+  moduleEnabled: boolean;
   allowlist: string[];
+  rateLimitPerHour: number;
+  maxFramesPerSim: number;
   injectModes: Record<string, string>;
   scenarios: Scenario[];
   policy: string;
-};
-
-type Alert = {
-  id: string;
-  ruleId: string;
-  severity: string;
-  title: string;
-  detail: string;
+  excludedOffensive: Record<string, boolean>;
 };
 
 export default function LabWifiPage() {
   const [catalog, setCatalog] = useState<Catalog | null>(null);
+  const [boundaries, setBoundaries] = useState<Record<string, string> | null>(
+    null
+  );
+  const [rateLimit, setRateLimit] = useState<{
+    remaining: number;
+    limit: number;
+  } | null>(null);
   const [scenario, setScenario] = useState("sim.deauth.broadcast_burst");
   const [bssid, setBssid] = useState("aa:bb:cc:11:22:01");
   const [clientMac, setClientMac] = useState("3c:22:fb:10:20:30");
   const [count, setCount] = useState(20);
   const [engagementId, setEngagementId] = useState("LAB-BOOKING-001");
   const [legalBasis, setLegalBasis] = useState(
-    "Isolated RF lab / allowlisted test SSID under written ROE"
+    "Isolated software evaluation / allowlisted lab BSSID under written ROE"
   );
   const [jurisdiction, setJurisdiction] = useState("UK");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [alerts, setAlerts] = useState<
+    { id: string; ruleId: string; severity: string; title: string; detail: string }[]
+  >([]);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
     const res = await fetch("/api/v1/lab-wifi");
     const data = await res.json();
     setCatalog(data.catalog);
+    setBoundaries(data.boundaries);
+    setRateLimit(data.rateLimit);
     setAlerts(data.recentAlerts || []);
     if (data.catalog?.allowlist?.[0]) setBssid(data.catalog.allowlist[0]);
   }, []);
@@ -79,6 +81,7 @@ export default function LabWifiPage() {
       } else {
         setResult(data);
         setAlerts(data.alerts || []);
+        if (data.rateLimit) setRateLimit(data.rateLimit);
       }
     } finally {
       setLoading(false);
@@ -87,38 +90,48 @@ export default function LabWifiPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
-            Module · Authorised lab evaluation
-          </div>
-          <h1 className="text-2xl font-semibold">
-            Wi‑Fi disconnect scenario simulator
-          </h1>
-          <p className="mt-1 max-w-3xl text-sm text-[var(--lm-muted)]">
-            Generates <strong className="text-cyan-200">synthetic</strong>{" "}
-            deauth/disassoc patterns into the WIDS bus for detector tuning and
-            blue-team drills.{" "}
-            <strong className="text-amber-200">RF inject is permanently off</strong>
-            .
-          </p>
+      <div>
+        <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/70">
+          Lab-only software harness
         </div>
+        <h1 className="text-2xl font-semibold">
+          Simulate attack events without OTA disruption
+        </h1>
+        <p className="mt-1 max-w-3xl text-sm text-[var(--lm-muted)]">
+          Injects <strong className="text-cyan-200">synthetic</strong> deauth /
+          disconnect patterns into WIDS for monitoring, alerting, and resilience
+          tests.{" "}
+          <strong className="text-amber-200">
+            Never transmits deauth, injection, or jamming frames.
+          </strong>
+        </p>
       </div>
 
-      <div className="rounded border border-rose-400/40 bg-rose-500/10 p-3 text-xs leading-relaxed text-rose-50/95">
-        <strong>Safeguards & law:</strong> (a) Controlled lab / defensive
-        evaluation only — allowlisted BSSIDs, engagement ID, legal basis. (b)
-        Strong product safeguards: no management-frame transmission;{" "}
-        <code className="text-rose-100">injectMode: rf</code> is rejected; lab
-        mode + allowlist gates. (c) UK <em>Computer Misuse Act 1990</em> (and
-        local equivalents): unauthorised impairment of systems/networks —
-        including disrupting third-party Wi‑Fi — can be a criminal offence.
-        Running impairment against live third-party networks is out of scope and
-        unsupported. Obtain written authority and isolated test spectrum.
-      </div>
+      {boundaries ? (
+        <div className="rounded border border-rose-400/40 bg-rose-500/10 p-3 text-xs leading-relaxed text-rose-50/95 space-y-1">
+          <div>
+            <strong>(a) Authorised use:</strong> {boundaries.a}
+          </div>
+          <div>
+            <strong>(b) Safeguards:</strong> {boundaries.b}
+          </div>
+          <div>
+            <strong>(c) Legal:</strong> {boundaries.c}
+          </div>
+        </div>
+      ) : null}
 
       {catalog ? (
         <div className="flex flex-wrap gap-2 text-[11px]">
+          <span
+            className={
+              catalog.moduleEnabled
+                ? "lm-badge lm-badge-live"
+                : "lm-badge lm-badge-crit"
+            }
+          >
+            module {catalog.moduleEnabled ? "on" : "off"}
+          </span>
           <span
             className={
               catalog.labModeEnabled
@@ -126,13 +139,13 @@ export default function LabWifiPage() {
                 : "lm-badge lm-badge-crit"
             }
           >
-            lab mode {catalog.labModeEnabled ? "ON" : "OFF"}
+            lab {catalog.labModeEnabled ? "on" : "off"}
           </span>
           <span className="lm-badge">
-            allowlist {catalog.allowlist.length} BSSID(s)
+            rate {rateLimit?.remaining ?? "—"}/{rateLimit?.limit ?? catalog.rateLimitPerHour} /hr
           </span>
           <span className="lm-badge lm-badge-warn">
-            {catalog.injectModes.rf}
+            OTA injection/deauth/jam: OFF
           </span>
         </div>
       ) : null}
@@ -141,7 +154,7 @@ export default function LabWifiPage() {
         <div className="lm-panel space-y-3 rounded-lg p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-cyan-200">
             <FlaskConical className="h-4 w-4" />
-            Scenario runner
+            Scenario runner (bus inject only)
           </div>
 
           <label className="block text-[11px] text-[var(--lm-muted)]">
@@ -159,14 +172,11 @@ export default function LabWifiPage() {
             </select>
           </label>
           <p className="text-[11px] text-[var(--lm-muted)]">
-            {
-              catalog?.scenarios.find((s) => s.id === scenario)
-                ?.description
-            }
+            {catalog?.scenarios.find((s) => s.id === scenario)?.description}
           </p>
 
           <label className="block text-[11px] text-[var(--lm-muted)]">
-            Lab BSSID (allowlisted)
+            Allowlisted lab BSSID
             <select
               className="lm-input mt-1 font-mono"
               value={bssid}
@@ -181,7 +191,7 @@ export default function LabWifiPage() {
           </label>
 
           <label className="block text-[11px] text-[var(--lm-muted)]">
-            Client MAC (targeted scenarios)
+            Client MAC
             <input
               className="lm-input mt-1 font-mono"
               value={clientMac}
@@ -190,12 +200,12 @@ export default function LabWifiPage() {
           </label>
 
           <label className="block text-[11px] text-[var(--lm-muted)]">
-            Synthetic frame count
+            Synthetic frame count (max {catalog?.maxFramesPerSim ?? 200})
             <input
               type="number"
               className="lm-input mt-1"
               min={1}
-              max={200}
+              max={catalog?.maxFramesPerSim ?? 200}
               value={count}
               onChange={(e) => setCount(Number(e.target.value))}
             />
@@ -237,12 +247,12 @@ export default function LabWifiPage() {
             ) : (
               <Play className="h-4 w-4" />
             )}
-            Run sim → WIDS bus
+            Run software sim → WIDS
           </button>
 
           {error ? <p className="text-sm text-rose-300">{error}</p> : null}
           {result ? (
-            <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded border border-[var(--lm-border)] bg-black/30 p-2 font-mono text-[10px] text-[var(--lm-muted)]">
+            <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded border border-[var(--lm-border)] bg-black/30 p-2 font-mono text-[10px] text-[var(--lm-muted)]">
               {JSON.stringify(
                 {
                   runId: result.runId,
@@ -250,6 +260,7 @@ export default function LabWifiPage() {
                   framesGenerated: result.framesGenerated,
                   widsAccepted: result.widsAccepted,
                   alertHint: result.alertHint,
+                  rateLimit: result.rateLimit,
                   error: result.error,
                 },
                 null,
@@ -261,9 +272,9 @@ export default function LabWifiPage() {
 
         <div className="lm-panel rounded-lg p-4">
           <div className="mb-2 text-[10px] uppercase tracking-wider text-cyan-300/80">
-            WIDS alerts after sim
+            Resulting WIDS alerts
           </div>
-          <ul className="max-h-[520px] space-y-2 overflow-auto text-xs">
+          <ul className="max-h-[480px] space-y-2 overflow-auto text-xs">
             {alerts.map((a) => (
               <li
                 key={a.id}
@@ -277,18 +288,22 @@ export default function LabWifiPage() {
             ))}
             {!alerts.length ? (
               <li className="text-[var(--lm-muted)]">
-                No alerts yet — run a flood scenario (not benign roam)
+                No alerts — try a flood scenario (not benign roam)
               </li>
             ) : null}
           </ul>
           <p className="mt-3 text-[11px] text-[var(--lm-muted)]">
-            Full detector UI:{" "}
+            Dashboard:{" "}
             <a className="text-cyan-300 underline" href="/console/wids">
               /console/wids
+            </a>{" "}
+            · Admin:{" "}
+            <a className="text-cyan-300 underline" href="/console/wireless-admin">
+              /console/wireless-admin
             </a>
-            . Product spec:{" "}
+            · PRD:{" "}
             <code className="text-cyan-200/80">
-              docs/WIRELESS_MONITORING_PRODUCT_SPEC.md
+              docs/PRD_WIFI_SECURITY_MONITORING.md
             </code>
           </p>
         </div>
