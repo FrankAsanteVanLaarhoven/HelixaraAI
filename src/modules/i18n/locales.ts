@@ -33,6 +33,7 @@ export type MessageKey =
   | "app.authorized"
   | "nav.command"
   | "nav.os"
+  | "nav.consequence"
   | "nav.scrape"
   | "nav.osint"
   | "nav.agents"
@@ -119,6 +120,7 @@ const en: Catalog = {
   "app.authorized": "Authorized use only",
   "nav.command": "Command",
   "nav.os": "Helixara OS",
+  "nav.consequence": "Consequence AI",
   "nav.scrape": "Stealth Crawl",
   "nav.osint": "OSINT",
   "nav.agents": "Agents",

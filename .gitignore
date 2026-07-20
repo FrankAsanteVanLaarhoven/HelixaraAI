@@ -43,4 +43,5 @@ next-env.d.ts
 
 # helixaraai runtime data
 /data/
+!/data/.gitkeep
 *.db
