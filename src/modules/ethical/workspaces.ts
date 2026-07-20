@@ -1,6 +1,5 @@
 /**
  * Separate Red / Blue / Purple workspaces (coordination views).
- * Same ethics gate; different focus — not isolated offensive sandboxes with weapons.
  */
 
 import { requireEthicalUsage } from "@/modules/ethical/usage";
@@ -13,7 +12,7 @@ import { listRfSim } from "@/modules/ethical/rfSim";
 
 export type WorkspaceId = "red" | "blue" | "purple";
 
-export function getWorkspace(id: WorkspaceId) {
+export async function getWorkspace(id: WorkspaceId) {
   const gate = requireEthicalUsage();
   const base = {
     gate,
@@ -23,6 +22,8 @@ export function getWorkspace(id: WorkspaceId) {
   };
 
   if (id === "red") {
+    const attack = await listAttackLibrary();
+    const kits = await listKits();
     return {
       ...base,
       title: "Red workspace",
@@ -31,32 +32,36 @@ export function getWorkspace(id: WorkspaceId) {
       roster: listRoster().filter((m) =>
         ["lead", "recon", "osint", "scribe"].includes(m.role)
       ),
-      campaigns: listAttackLibrary().campaigns,
-      kits: listKits().items.filter((k) => k.category !== "detection_signature"),
+      campaigns: attack.campaigns,
+      kits: kits.items.filter((k) => k.category !== "detection_signature"),
       links: [
         "/console/redteam",
         "/console/redteam/attack",
         "/console/redteam/kits",
         "/console/redteam/awareness",
         "/console/missions",
+        "/console/admin/elevated",
       ],
     };
   }
 
   if (id === "blue") {
+    const kits = await listKits();
+    const attack = await listAttackLibrary();
+    const rf = await listRfSim();
     return {
       ...base,
       title: "Blue workspace",
       focus: "Detection engineering, WIDS, telemetry, remediation kits",
-      detections: listKits().items.filter(
+      detections: kits.items.filter(
         (k) =>
           k.category === "detection_signature" || k.category === "remediation"
       ),
-      techniques: listAttackLibrary().techniques.filter(
+      techniques: attack.techniques.filter(
         (t) =>
           t.helixaraMode === "detection_only" || t.helixaraMode === "tabletop"
       ),
-      rfSim: listRfSim(),
+      rfSim: rf,
       links: [
         "/console/wids",
         "/console/lab-wifi",
@@ -64,23 +69,25 @@ export function getWorkspace(id: WorkspaceId) {
         "/console/redteam/kits",
         "/console/redteam/rf-sim",
         "/console/audit",
+        "/console/admin/elevated",
       ],
     };
   }
 
-  // purple
-  const board = listPurpleBoard();
+  const board = await listPurpleBoard();
+  const awareness = await listAwareness();
   return {
     ...base,
     title: "Purple workspace",
     focus: "Joint exercises — Red plans vs Blue detections",
     board,
-    awareness: listAwareness().exercises,
+    awareness: awareness.exercises,
     links: [
       "/console/redteam/purple",
       "/console/redteam",
       "/console/redteam/attack",
       "/console/wids",
+      "/console/admin/elevated",
     ],
   };
 }
@@ -98,6 +105,6 @@ export function listWorkspaces() {
       },
     ],
     policy:
-      "Separate workspaces for ethical coordination. No isolated live-attack sandbox.",
+      "Separate workspaces for ethical coordination. Elevated paths need owner+superadmin dual-control.",
   };
 }

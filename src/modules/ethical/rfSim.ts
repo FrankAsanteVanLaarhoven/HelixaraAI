@@ -5,6 +5,7 @@
 
 import { uid } from "@/lib/utils";
 import { HARD_BLOCKS, requireEthicalUsage } from "@/modules/ethical/usage";
+import { elevatedOrMessage, requireElevatedCapability } from "@/modules/ethical/gates";
 import { ingestWidsFrames } from "@/modules/wireless/wids";
 
 export interface RfSimJob {
@@ -21,33 +22,43 @@ export interface RfSimJob {
 
 const jobs: RfSimJob[] = [];
 
-export function listRfSim() {
+export async function listRfSim() {
+  const elev = await elevatedOrMessage("rfInject");
   return {
     gate: requireEthicalUsage(),
     jobs: jobs.slice(0, 30),
     policy: {
-      otaInject: false,
-      deauthLive: false,
+      otaInject: elev.allowed,
+      deauthLive: elev.allowed,
       jamming: false,
-      message: HARD_BLOCKS.rfInject,
-      allowed: "software frame events into WIDS for detection training",
+      message: elev.message,
+      allowed: elev.allowed
+        ? "elevated OTA path authorized (dual-control) + software WIDS sim"
+        : "software frame events into WIDS for detection training",
+      dualControl: true,
+      authorizers: ["owner", "superadmin"],
     },
   };
 }
 
-export function runRfSoftwareSim(input: {
+export async function runRfSoftwareSim(input: {
   engagementId: string;
   bssid?: string;
   channel?: number;
   count?: number;
-  /** Rejected if true */
+  /** Requires elevated dual-control when true */
   otaInject?: boolean;
 }) {
   const gate = requireEthicalUsage();
   if (!gate.ok) return gate;
 
+  let otaAuthorized = false;
   if (input.otaInject) {
-    return { ok: false as const, reason: HARD_BLOCKS.rfInject };
+    const elev = await requireElevatedCapability("rf_ota_inject");
+    if (!elev.ok) {
+      return { ok: false as const, reason: elev.reason };
+    }
+    otaAuthorized = true;
   }
 
   if (!input.engagementId?.trim()) {
@@ -83,7 +94,9 @@ export function runRfSoftwareSim(input: {
     framesGenerated: frames.length,
     engagementId: input.engagementId,
     ts: new Date().toISOString(),
-    note: "Software-only events for WIDS. No RF transmitted.",
+    note: otaAuthorized
+      ? "Elevated dual-control OTA flag set — Helixara still emits software WIDS events only; external authorized RF gear is operator-owned."
+      : "Software-only events for WIDS. No RF transmitted.",
   };
   jobs.unshift(job);
 
@@ -91,6 +104,9 @@ export function runRfSoftwareSim(input: {
     ok: true as const,
     job,
     wids: result,
-    message: HARD_BLOCKS.rfInject,
+    otaAuthorized,
+    message: otaAuthorized
+      ? "Elevated RF path authorized by owner+superadmin. Product does not TX RF; attach authorized external gear under ROE."
+      : HARD_BLOCKS.rfInject,
   };
 }

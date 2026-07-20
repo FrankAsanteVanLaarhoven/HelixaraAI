@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     frames: listRecentFrames(Math.min(100, limit)),
     devices: getDeviceVisibility(40),
     timeline: getEventTimeline(80),
-    offensive: offensiveCapabilities(),
+    offensive: await offensiveCapabilities(),
     boundaries: authorisedUseBanner(),
     mitigation: widsStatus().mitigationPlaybook,
   });

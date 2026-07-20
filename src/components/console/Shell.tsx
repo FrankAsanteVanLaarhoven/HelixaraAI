@@ -61,6 +61,7 @@ const NAV: { href: string; key: MessageKey; icon: typeof LayoutDashboard }[] = [
   { href: "/console/weather", key: "nav.weather", icon: CloudSun },
   { href: "/console/quantum", key: "nav.quantum", icon: Cpu },
   { href: "/console/twins", key: "nav.twins", icon: Orbit },
+  { href: "/console/admin/elevated", key: "nav.elevated", icon: Settings },
   { href: "/console/audit", key: "nav.audit", icon: ScrollText },
   { href: "/console/capabilities", key: "nav.capabilities", icon: Radar },
 ];

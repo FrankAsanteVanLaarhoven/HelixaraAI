@@ -5,6 +5,7 @@
 
 import { uid } from "@/lib/utils";
 import { HARD_BLOCKS, requireEthicalUsage } from "@/modules/ethical/usage";
+import { elevatedOrMessage, requireElevatedCapability } from "@/modules/ethical/gates";
 
 export type AwarenessChannel = "email_sim" | "sms_sim";
 
@@ -82,48 +83,61 @@ const TEMPLATES: AwarenessTemplate[] = [
 
 const exercises: AwarenessExercise[] = [];
 
-export function listAwareness() {
+export async function listAwareness() {
+  const ph = await elevatedOrMessage("phishingLive");
+  const sms = await elevatedOrMessage("smsSpoof");
   return {
     gate: requireEthicalUsage(),
     templates: TEMPLATES,
     exercises: exercises.slice(0, 40),
     policy: {
-      livePhishing: false,
-      smsSpoof: false,
-      liveSend: false,
-      messages: [HARD_BLOCKS.phishingLive, HARD_BLOCKS.smsSpoof],
+      livePhishing: ph.allowed,
+      smsSpoof: sms.allowed,
+      liveSend: ph.allowed || sms.allowed,
+      messages: [ph.message, sms.message],
+      dualControl: true,
+      authorizers: ["owner", "superadmin"],
     },
   };
 }
 
-export function createAwarenessExercise(input: {
+export async function createAwarenessExercise(input: {
   templateId: string;
   title: string;
   audienceNote: string;
   engagementId?: string;
-  /** Must be false — API rejects true */
+  /** Requires elevated dual-control when true */
   liveSend?: boolean;
   spoofSender?: boolean;
 }) {
   const gate = requireEthicalUsage();
   if (!gate.ok) return gate;
 
-  if (input.liveSend || input.spoofSender) {
-    return {
-      ok: false as const,
-      reason: input.spoofSender ? HARD_BLOCKS.smsSpoof : HARD_BLOCKS.phishingLive,
-    };
+  if (input.liveSend) {
+    const elev = await requireElevatedCapability("phishing_live_host");
+    if (!elev.ok) {
+      return { ok: false as const, reason: elev.reason };
+    }
+  }
+  if (input.spoofSender) {
+    const elev = await requireElevatedCapability("sms_spoof_send");
+    if (!elev.ok) {
+      return { ok: false as const, reason: elev.reason };
+    }
   }
 
   const tpl = TEMPLATES.find((t) => t.id === input.templateId);
   if (!tpl) return { ok: false as const, reason: "unknown template" };
 
+  const elevatedLive = Boolean(input.liveSend || input.spoofSender);
   const previewHtml = [
     `<div style="border:2px dashed #f5b942;padding:12px;font-family:sans-serif">`,
-    `<strong style="color:#b45309">SIMULATION ONLY — ETHICAL TRAINING</strong>`,
+    elevatedLive
+      ? `<strong style="color:#e11d48">ELEVATED AUTHORIZED MODE — owner+superadmin dual-control</strong>`
+      : `<strong style="color:#b45309">SIMULATION ONLY — ETHICAL TRAINING</strong>`,
     `<p>${tpl.name}</p>`,
     `<p>${tpl.body}</p>`,
-    `<p><em>Channel: ${tpl.channel} · liveSend=false · spoof=false</em></p>`,
+    `<p><em>Channel: ${tpl.channel} · liveSend=${Boolean(input.liveSend)} · spoof=${Boolean(input.spoofSender)}</em></p>`,
     `<p>Audience note: ${input.audienceNote.slice(0, 400)}</p>`,
     `</div>`,
   ].join("");
@@ -134,14 +148,19 @@ export function createAwarenessExercise(input: {
     title: input.title.slice(0, 160),
     audienceNote: input.audienceNote.slice(0, 500),
     engagementId: input.engagementId,
-    status: "preview",
+    status: elevatedLive ? "preview" : "preview",
     createdAt: new Date().toISOString(),
     previewHtml,
-    warnings: [
-      HARD_BLOCKS.phishingLive,
-      HARD_BLOCKS.smsSpoof,
-      "Do not copy simulation content to real mail/SMS gateways.",
-    ],
+    warnings: elevatedLive
+      ? [
+          "Elevated dual-control path active. Still restricted to in-scope ROE targets only.",
+          "External gateway delivery is operator-owned; Helixara logs authorization only.",
+        ]
+      : [
+          HARD_BLOCKS.phishingLive,
+          HARD_BLOCKS.smsSpoof,
+          "Do not copy simulation content to real mail/SMS gateways without elevated authorization.",
+        ],
   };
   exercises.unshift(ex);
   return { ok: true as const, exercise: ex };

@@ -45,6 +45,7 @@ export type MessageKey =
   | "nav.rtAttack"
   | "nav.rtPurple"
   | "nav.rtWs"
+  | "nav.elevated"
   | "nav.kanban"
   | "nav.telemetry"
   | "nav.wireless"
@@ -140,6 +141,7 @@ const en: Catalog = {
   "nav.rtAttack": "RT ATT&CK",
   "nav.rtPurple": "Purple Board",
   "nav.rtWs": "Red/Blue WS",
+  "nav.elevated": "Elevated Auth",
   "nav.kanban": "Kanban Team",
   "nav.telemetry": "Telemetry Map",
   "nav.wireless": "Wi‑Fi Lab",

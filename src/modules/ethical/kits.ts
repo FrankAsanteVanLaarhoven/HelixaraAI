@@ -5,6 +5,8 @@
 
 import { uid } from "@/lib/utils";
 import { HARD_BLOCKS, requireEthicalUsage } from "@/modules/ethical/usage";
+import { elevatedOrMessage } from "@/modules/ethical/gates";
+import { requireElevatedCapability } from "@/modules/ethical/gates";
 
 export type KitCategory =
   | "cve_awareness"
@@ -95,37 +97,58 @@ const KITS: KitItem[] = [
 
 const customNotes: { id: string; kitId: string; note: string; ts: string }[] = [];
 
-export function listKits() {
+export async function listKits() {
+  const elev = await elevatedOrMessage("exploitLive");
   return {
     gate: requireEthicalUsage(),
-    items: KITS,
+    items: KITS.map((k) =>
+      k.category === "payload_lab_placeholder"
+        ? {
+            ...k,
+            blockedNote: elev.allowed
+              ? elev.message
+              : HARD_BLOCKS.exploitLive,
+            elevatedUnlocked: elev.allowed,
+          }
+        : k
+    ),
     notes: customNotes.slice(0, 50),
     policy: {
-      liveWeaponization: false,
-      exploitGeneration: false,
-      message: HARD_BLOCKS.exploitLive,
+      liveWeaponization: elev.allowed,
+      exploitGeneration: elev.allowed,
+      message: elev.message,
+      dualControl: true,
+      authorizers: ["owner", "superadmin"],
     },
   };
 }
 
-export function addKitNote(kitId: string, note: string) {
+export async function addKitNote(kitId: string, note: string) {
   const gate = requireEthicalUsage();
   if (!gate.ok) return gate;
   if (!KITS.some((k) => k.id === kitId)) {
     return { ok: false as const, reason: "unknown kit" };
   }
-  // Refuse if note looks like payload dump
+  // Payload-like notes require elevated dual-control
   if (
     /\b(msfvenom|shellcode|reverse_tcp|powershell\s+-enc|base64\s*payload)\b/i.test(
       note
     )
   ) {
-    return {
-      ok: false as const,
-      reason: HARD_BLOCKS.exploitLive,
-    };
+    const elev = await requireElevatedCapability("exploit_payload_live");
+    if (!elev.ok) {
+      return {
+        ok: false as const,
+        reason: elev.reason,
+      };
+    }
   }
-  const row = { id: uid("kitn"), kitId, note: note.slice(0, 2000), ts: new Date().toISOString() };
+  const row = {
+    id: uid("kitn"),
+    kitId,
+    note: note.slice(0, 2000),
+    ts: new Date().toISOString(),
+  };
   customNotes.unshift(row);
   return { ok: true as const, note: row };
 }

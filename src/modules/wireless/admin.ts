@@ -1,6 +1,6 @@
 /**
  * Admin controls, rate limits, and authorised-use state for Wi‑Fi monitoring.
- * Offensive TX (injection / deauth / jam) is not configurable — permanently off.
+ * OTA offensive TX locked by default — dual-control owner+superadmin can authorize elevated RF path.
  */
 
 import { promises as fs } from "fs";
@@ -172,21 +172,27 @@ export function recordWidsIngest(count: number) {
   for (let i = 0; i < count; i++) ingestTimestamps.push(now);
 }
 
-export function offensiveCapabilities() {
+export async function offensiveCapabilities() {
+  const { isCapabilityAuthorized } = await import("@/modules/auth/elevated");
+  const elev = await isCapabilityAuthorized("rf_ota_inject");
   return {
-    packetInjectionOta: false,
-    deauthTransmission: false,
+    packetInjectionOta: elev.authorized,
+    deauthTransmission: elev.authorized,
     jamming: false,
     evilTwin: false,
-    note:
-      "Permanently excluded by PRD. Lab mode only injects software events into the detector bus.",
+    elevated: elev.authorized,
+    dualControl: true,
+    authorizers: ["owner", "superadmin"],
+    note: elev.authorized
+      ? `Elevated RF path authorized by owner+superadmin until ${elev.grant?.expiresAt || "n/a"}. Helixara still does not TX RF natively — external authorized gear under ROE.`
+      : "OTA inject/deauth locked. Software WIDS sim available. Unlock only via dual-control at /console/admin/elevated.",
   };
 }
 
 export function authorisedUseBanner() {
   return {
     a: "Controlled lab or defensive monitoring of authorised networks only.",
-    b: "Strong safeguards: no OTA deauth/injection/jam; audit logs; rate limits; admin kill switch; lab allowlists; ROE attestation.",
-    c: "UK Computer Misuse Act 1990 and local law apply. Unauthorised impairment of systems/networks (including wireless disruption of third parties) can be criminal. This product detects and simulates in software; it does not attack.",
+    b: "Safeguards: OTA deauth/inject locked unless owner+superadmin dual-control; audit logs; rate limits; admin kill switch; lab allowlists; ROE attestation.",
+    c: "UK Computer Misuse Act 1990 and local law apply. Unauthorised impairment of systems/networks can be criminal. Ethical hacking only under ROE.",
   };
 }

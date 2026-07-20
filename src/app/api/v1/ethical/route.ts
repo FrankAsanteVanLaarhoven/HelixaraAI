@@ -31,18 +31,18 @@ export async function GET(req: NextRequest) {
   const side = req.nextUrl.searchParams.get("side") || "red";
 
   if (section === "usage") {
-    return NextResponse.json(getEthicalUsageState());
+    return NextResponse.json(await getEthicalUsageState());
   }
-  if (section === "kits") return NextResponse.json(listKits());
-  if (section === "awareness") return NextResponse.json(listAwareness());
-  if (section === "rf") return NextResponse.json(listRfSim());
-  if (section === "attack") return NextResponse.json(listAttackLibrary());
-  if (section === "purple") return NextResponse.json(listPurpleBoard());
+  if (section === "kits") return NextResponse.json(await listKits());
+  if (section === "awareness") return NextResponse.json(await listAwareness());
+  if (section === "rf") return NextResponse.json(await listRfSim());
+  if (section === "attack") return NextResponse.json(await listAttackLibrary());
+  if (section === "purple") return NextResponse.json(await listPurpleBoard());
   if (section === "workspaces") return NextResponse.json(listWorkspaces());
   if (section === "workspace") {
     const id =
       side === "blue" || side === "purple" || side === "red" ? side : "red";
-    return NextResponse.json(getWorkspace(id));
+    return NextResponse.json(await getWorkspace(id));
   }
   return NextResponse.json({
     notice: ETHICAL_USAGE_NOTICE,
@@ -91,13 +91,13 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "kit.note") {
-      const r = addKitNote(String(body.kitId || ""), String(body.note || ""));
+      const r = await addKitNote(String(body.kitId || ""), String(body.note || ""));
       if (!r.ok) return NextResponse.json(r, { status: 403 });
       return NextResponse.json(r);
     }
 
     if (action === "awareness.create") {
-      const r = createAwarenessExercise({
+      const r = await createAwarenessExercise({
         templateId: String(body.templateId || ""),
         title: String(body.title || "Awareness exercise"),
         audienceNote: String(body.audienceNote || "Authorized internal staff"),
@@ -110,16 +110,20 @@ export async function POST(req: NextRequest) {
         operatorId: operator.operatorId,
         action: "ethical.awareness.sim",
         allowed: true,
-        risk: "low",
+        risk: body.liveSend || body.spoofSender ? "critical" : "low",
         severity: "info",
         engagementId: body.engagementId,
-        details: { templateId: body.templateId, liveSend: false },
+        details: {
+          templateId: body.templateId,
+          liveSend: Boolean(body.liveSend),
+          spoofSender: Boolean(body.spoofSender),
+        },
       });
       return NextResponse.json(r);
     }
 
     if (action === "rf.software_sim") {
-      const r = runRfSoftwareSim({
+      const r = await runRfSoftwareSim({
         engagementId: String(body.engagementId || ""),
         bssid: body.bssid,
         channel: body.channel,
@@ -131,32 +135,40 @@ export async function POST(req: NextRequest) {
         operatorId: operator.operatorId,
         action: "ethical.rf.software_sim",
         allowed: true,
-        risk: "medium",
+        risk: r.otaAuthorized ? "critical" : "medium",
         severity: "info",
         engagementId: body.engagementId,
-        details: { otaInject: false, frames: r.job?.framesGenerated },
+        details: {
+          otaInject: Boolean(body.otaInject),
+          otaAuthorized: Boolean(r.otaAuthorized),
+          frames: r.job?.framesGenerated,
+        },
       });
       return NextResponse.json(r);
     }
 
     if (action === "attack.campaign") {
-      const r = createCampaign({
+      const r = await createCampaign({
         name: String(body.name || "Campaign"),
         engagementId: String(body.engagementId || ""),
         objective: String(body.objective || ""),
         techniqueIds: Array.isArray(body.techniqueIds)
           ? body.techniqueIds.map(String)
           : [],
+        liveMode: body.liveMode === true,
       });
       if (!r.ok) return NextResponse.json(r, { status: 403 });
       await appendAudit({
         operatorId: operator.operatorId,
         action: "ethical.attack.campaign",
         allowed: true,
-        risk: "medium",
+        risk: body.liveMode ? "critical" : "medium",
         severity: "info",
         engagementId: body.engagementId,
-        details: { techniques: body.techniqueIds },
+        details: {
+          techniques: body.techniqueIds,
+          liveMode: Boolean(body.liveMode),
+        },
       });
       return NextResponse.json(r);
     }

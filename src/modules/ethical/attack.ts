@@ -5,6 +5,8 @@
 
 import { uid } from "@/lib/utils";
 import { HARD_BLOCKS, requireEthicalUsage } from "@/modules/ethical/usage";
+import { requireElevatedCapability } from "@/modules/ethical/gates";
+import { isCapabilityAuthorized } from "@/modules/auth/elevated";
 
 export interface AttackTechnique {
   id: string;
@@ -106,28 +108,39 @@ const TECHNIQUES: AttackTechnique[] = [
 
 const campaigns: CampaignPlan[] = [];
 
-export function listAttackLibrary() {
+export async function listAttackLibrary() {
+  const live = await isCapabilityAuthorized("attack_chain_live");
   return {
     gate: requireEthicalUsage(),
     techniques: TECHNIQUES,
     campaigns: campaigns.slice(0, 40),
     policy: {
-      liveExploitChains: false,
-      message:
-        "Campaign runner is tabletop / recon-mapping / detection-engineering only. " +
-        HARD_BLOCKS.exploitLive,
+      liveExploitChains: live.authorized,
+      message: live.authorized
+        ? live.reason + " — elevated live campaign mode (owner+superadmin)."
+        : "Campaign runner is tabletop / recon-mapping / detection-engineering only until dual-control authorizes attack_chain_live. " +
+          HARD_BLOCKS.exploitLive,
+      dualControl: true,
+      authorizers: ["owner", "superadmin"],
     },
   };
 }
 
-export function createCampaign(input: {
+export async function createCampaign(input: {
   name: string;
   engagementId: string;
   objective: string;
   techniqueIds: string[];
+  /** Requires attack_chain_live elevated grant */
+  liveMode?: boolean;
 }) {
   const gate = requireEthicalUsage();
   if (!gate.ok) return gate;
+
+  if (input.liveMode) {
+    const elev = await requireElevatedCapability("attack_chain_live");
+    if (!elev.ok) return { ok: false as const, reason: elev.reason };
+  }
 
   if (!input.engagementId.trim()) {
     return { ok: false as const, reason: "engagementId required (tie to ROE eng)" };
@@ -180,13 +193,16 @@ export function createCampaign(input: {
     engagementId: input.engagementId.trim(),
     objective: input.objective.slice(0, 2000),
     techniqueIds: selected.map((t) => t.id),
-    status: selected.every((t) => t.helixaraMode === "recon_only")
+    status: input.liveMode
       ? "recon_mapped"
-      : "tabletop",
+      : selected.every((t) => t.helixaraMode === "recon_only")
+        ? "recon_mapped"
+        : "tabletop",
     steps,
     createdAt: new Date().toISOString(),
-    ethicalNote:
-      "Ethical hacking only. No live exploit chains, phishing send, or RF inject.",
+    ethicalNote: input.liveMode
+      ? "ELEVATED live campaign mode authorized by owner+superadmin dual-control under ROE."
+      : "Ethical hacking only. Live chains require dual-control elevated grant.",
   };
   campaigns.unshift(plan);
   return { ok: true as const, campaign: plan };

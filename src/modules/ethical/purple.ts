@@ -5,6 +5,7 @@
 
 import { uid } from "@/lib/utils";
 import { requireEthicalUsage } from "@/modules/ethical/usage";
+import { isCapabilityAuthorized } from "@/modules/auth/elevated";
 
 export type PurpleColumn =
   | "scenario"
@@ -56,8 +57,9 @@ function seed() {
   }
 }
 
-export function listPurpleBoard() {
+export async function listPurpleBoard() {
   seed();
+  const live = await isCapabilityAuthorized("purple_live_orchestrate");
   return {
     gate: requireEthicalUsage(),
     columns: [
@@ -72,9 +74,12 @@ export function listPurpleBoard() {
       (a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt)
     ),
     policy: {
-      liveAttacks: false,
-      message:
-        "Purple board coordinates authorized exercises and detection validation. No live weaponization.",
+      liveAttacks: live.authorized,
+      message: live.authorized
+        ? "Purple live orchestrate authorized (owner+superadmin dual-control)."
+        : "Purple board coordinates authorized exercises and detection validation. Live orchestrate locked until dual-control.",
+      dualControl: true,
+      authorizers: ["owner", "superadmin"],
     },
   };
 }

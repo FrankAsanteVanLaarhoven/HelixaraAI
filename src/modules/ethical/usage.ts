@@ -1,7 +1,12 @@
 /**
- * Mandatory ethical-hacking usage acceptance for expanded Red Team surfaces.
- * Live weaponization (real exploits, SMS spoof, OTA deauth, live phishing) stays off.
+ * Mandatory ethical-hacking usage acceptance for Red Team surfaces.
+ * Elevated (owner+superadmin dual-control) unlocks restricted paths.
  */
+
+import {
+  BLOCK_TO_CAPABILITY,
+  isCapabilityAuthorized,
+} from "@/modules/auth/elevated";
 
 export const ETHICAL_USAGE_NOTICE = `
 HELIXARA ETHICAL HACKING — AUTHORIZED USE ONLY
@@ -12,24 +17,33 @@ or Red/Blue workspaces you confirm:
 1. You have written authorization (ROE / SOW / lab charter) for every target.
 2. Activity is ethical hacking and defensive security testing only.
 3. You will not target systems, people, or networks without permission.
-4. Live weaponization is disabled in this product:
-   • No exploit / shellcode generation for real-world use
-   • No live phishing sites or credential harvest against real users
-   • No SMS / caller-ID spoofing or message injection
-   • No OTA deauth, jamming, or RF frame injection
-5. Kits, campaigns, and sims are for training, tabletop, detection engineering,
-   and authorized lab software simulation under ROE.
+4. High-risk paths stay LOCKED by default and unlock only when BOTH
+   verified owner AND superadmin authorize them (dual control):
+   • Exploit / payload live lab
+   • Live phishing host
+   • SMS spoof / send
+   • OTA deauth / RF inject
+   • Live ATT&CK campaign runner
+   • Purple live orchestrate
+5. Default mode: training, tabletop, detection engineering, software sim.
 6. You accept legal responsibility under applicable law (e.g. CFAA, CMA 1990,
    GDPR/UK DPA) and your organization's policies.
 
 Refuse if you cannot attest. Unauthorized use may be a criminal offence.
+Configure tokens: HELIXARA_OWNER_TOKEN, HELIXARA_SUPERADMIN_TOKEN
+Admin UI: /console/admin/elevated
 `.trim();
 
+/** Fallback copy when elevated not granted */
 export const HARD_BLOCKS = {
-  exploitLive: "Live exploit/payload generation is permanently disabled. Use CVE awareness + remediation kits only.",
-  phishingLive: "Live phishing hosting and credential capture are permanently disabled. Use SIMULATION templates only.",
-  smsSpoof: "SMS spoof / sender-ID spoof / smishing send is permanently disabled. Awareness previews only.",
-  rfInject: "OTA deauth / RF inject / jamming is permanently disabled. Software lab simulation for WIDS training only.",
+  exploitLive:
+    "Exploit/payload live path is locked. Requires dual-control authorization by verified owner AND superadmin.",
+  phishingLive:
+    "Live phishing host is locked. Requires dual-control authorization by verified owner AND superadmin.",
+  smsSpoof:
+    "SMS spoof/send is locked. Requires dual-control authorization by verified owner AND superadmin.",
+  rfInject:
+    "OTA deauth/RF inject is locked. Requires dual-control authorization by verified owner AND superadmin. Software WIDS sim remains available.",
   unauthorized: "Target must be in-scope under attested ROE.",
 } as const;
 
@@ -41,14 +55,40 @@ export function isEthicalUsageAccepted(): boolean {
   return accepted;
 }
 
-export function getEthicalUsageState() {
+async function elevatedStatus(blockKey: keyof typeof HARD_BLOCKS) {
+  const cap = BLOCK_TO_CAPABILITY[blockKey];
+  if (!cap) {
+    return { allowed: false, message: HARD_BLOCKS[blockKey] };
+  }
+  const auth = await isCapabilityAuthorized(cap);
+  if (auth.authorized) {
+    return {
+      allowed: true,
+      message: `Elevated ${cap} authorized by owner + superadmin until ${auth.grant?.expiresAt || "n/a"}`,
+    };
+  }
+  return {
+    allowed: false,
+    message: `${HARD_BLOCKS[blockKey]} Unlock at /console/admin/elevated (owner AND superadmin).`,
+  };
+}
+
+export async function getEthicalUsageState() {
+  const elevated = {
+    exploitLive: await elevatedStatus("exploitLive"),
+    phishingLive: await elevatedStatus("phishingLive"),
+    smsSpoof: await elevatedStatus("smsSpoof"),
+    rfInject: await elevatedStatus("rfInject"),
+  };
   return {
     accepted,
     acceptedAt,
     acceptedBy,
     notice: ETHICAL_USAGE_NOTICE,
     hardBlocks: HARD_BLOCKS,
-    mode: "ethical-hacking-only" as const,
+    elevated,
+    mode: "ethical-hacking-with-elevated-dual-control" as const,
+    adminPath: "/console/admin/elevated",
   };
 }
 

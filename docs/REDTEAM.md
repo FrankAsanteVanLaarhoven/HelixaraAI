@@ -32,6 +32,26 @@ Every lab under `/console/redteam/*` requires typing:
 - Engagements: `/api/v1/redteam`  
 - Ethical labs: `/api/v1/ethical?section=usage|kits|awareness|rf|attack|purple|workspace`
 
+## Elevated dual-control (owner + superadmin only)
+
+Restricted paths are **locked by default**. They unlock only when **both** a verified **owner** and a verified **superadmin** approve the capability (dual control), with engagement id, legal basis, and expiry.
+
+| Capability id | Covers |
+|---------------|--------|
+| `exploit_payload_live` | Payload / exploit elevated lab notes |
+| `phishing_live_host` | Live phishing host flag |
+| `sms_spoof_send` | SMS spoof/send flag |
+| `rf_ota_inject` | OTA deauth / RF inject flag |
+| `attack_chain_live` | Live ATT&CK campaign mode |
+| `purple_live_orchestrate` | Purple live orchestrate |
+
+**Admin UI:** `/console/admin/elevated`  
+**API:** `/api/v1/admin/elevated`  
+**Env:** `HELIXARA_OWNER_TOKEN`, `HELIXARA_SUPERADMIN_TOKEN`  
+**Lab demo:** `HELIXARA_ALLOW_DEMO_ELEVATED=1` with demo tokens documented in the UI.
+
+Operators cannot verify elevated roles or approve capabilities. Either authorizer may revoke.
+
 ## Legal
 
 Authorized ethical hacking and defensive security testing only. Operators must hold ROE/SOW for every target.
