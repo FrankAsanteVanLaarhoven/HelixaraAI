@@ -2,17 +2,106 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* Default + explicit dark */
+:root,
+html[data-theme="dark"] {
   --lm-bg: #05080f;
+  --lm-bg-mid: #070d18;
   --lm-panel: #0a1220;
   --lm-panel-2: #0d1829;
   --lm-border: #1a2d4a;
-  --lm-cyan: #2ee6ff;
-  --lm-amber: #f5b942;
-  --lm-green: #3dff9a;
-  --lm-red: #ff4d6a;
+  --lm-cyan: #0891b2;
+  --lm-cyan-bright: #2ee6ff;
+  --lm-amber: #d97706;
+  --lm-amber-bright: #f5b942;
+  --lm-green: #059669;
+  --lm-green-bright: #3dff9a;
+  --lm-red: #e11d48;
+  --lm-red-bright: #ff4d6a;
   --lm-text: #d7e6f7;
   --lm-muted: #7f98b3;
+  --lm-header: rgba(5, 8, 15, 0.88);
+  --lm-glow: rgba(46, 230, 255, 0.45);
+  --lm-grid: rgba(46, 230, 255, 0.04);
+  --lm-panel-grad-a: rgba(13, 24, 41, 0.92);
+  --lm-panel-grad-b: rgba(10, 18, 32, 0.96);
+  --lm-btn-border: rgba(46, 230, 255, 0.35);
+  --lm-btn-bg-a: rgba(46, 230, 255, 0.16);
+  --lm-btn-bg-b: rgba(46, 230, 255, 0.05);
+  --lm-btn-hover-border: rgba(46, 230, 255, 0.7);
+  --lm-input-bg: rgba(5, 12, 22, 0.9);
+  --lm-shadow: rgba(0, 0, 0, 0.35);
+  --lm-scroll: #1a2d4a;
+  --lm-accent-display: #2ee6ff;
+  --lm-map-bg: #0a0f14;
+}
+
+/* Light theme */
+html[data-theme="light"] {
+  --lm-bg: #f4f7fb;
+  --lm-bg-mid: #e8eef6;
+  --lm-panel: #ffffff;
+  --lm-panel-2: #f8fafc;
+  --lm-border: #c5d0e0;
+  --lm-cyan: #0e7490;
+  --lm-cyan-bright: #0891b2;
+  --lm-amber: #b45309;
+  --lm-amber-bright: #d97706;
+  --lm-green: #047857;
+  --lm-green-bright: #059669;
+  --lm-red: #be123c;
+  --lm-red-bright: #e11d48;
+  --lm-text: #0f172a;
+  --lm-muted: #475569;
+  --lm-header: rgba(255, 255, 255, 0.92);
+  --lm-glow: rgba(8, 145, 178, 0.25);
+  --lm-grid: rgba(8, 145, 178, 0.06);
+  --lm-panel-grad-a: rgba(255, 255, 255, 0.98);
+  --lm-panel-grad-b: rgba(248, 250, 252, 0.98);
+  --lm-btn-border: rgba(8, 145, 178, 0.45);
+  --lm-btn-bg-a: rgba(8, 145, 178, 0.12);
+  --lm-btn-bg-b: rgba(8, 145, 178, 0.04);
+  --lm-btn-hover-border: rgba(8, 145, 178, 0.8);
+  --lm-input-bg: #ffffff;
+  --lm-shadow: rgba(15, 23, 42, 0.08);
+  --lm-scroll: #94a3b8;
+  --lm-accent-display: #0e7490;
+  --lm-map-bg: #e2e8f0;
+}
+
+/* Prefer dark when preference not yet applied (SSR flash) */
+@media (prefers-color-scheme: light) {
+  html:not([data-theme]) {
+    --lm-bg: #f4f7fb;
+    --lm-bg-mid: #e8eef6;
+    --lm-panel: #ffffff;
+    --lm-panel-2: #f8fafc;
+    --lm-border: #c5d0e0;
+    --lm-cyan: #0e7490;
+    --lm-cyan-bright: #0891b2;
+    --lm-amber: #b45309;
+    --lm-amber-bright: #d97706;
+    --lm-green: #047857;
+    --lm-green-bright: #059669;
+    --lm-red: #be123c;
+    --lm-red-bright: #e11d48;
+    --lm-text: #0f172a;
+    --lm-muted: #475569;
+    --lm-header: rgba(255, 255, 255, 0.92);
+    --lm-glow: rgba(8, 145, 178, 0.25);
+    --lm-grid: rgba(8, 145, 178, 0.06);
+    --lm-panel-grad-a: rgba(255, 255, 255, 0.98);
+    --lm-panel-grad-b: rgba(248, 250, 252, 0.98);
+    --lm-btn-border: rgba(8, 145, 178, 0.45);
+    --lm-btn-bg-a: rgba(8, 145, 178, 0.12);
+    --lm-btn-bg-b: rgba(8, 145, 178, 0.04);
+    --lm-btn-hover-border: rgba(8, 145, 178, 0.8);
+    --lm-input-bg: #ffffff;
+    --lm-shadow: rgba(15, 23, 42, 0.08);
+    --lm-scroll: #94a3b8;
+    --lm-accent-display: #0e7490;
+    --lm-map-bg: #e2e8f0;
+  }
 }
 
 * {
@@ -27,14 +116,22 @@ body {
 body {
   color: var(--lm-text);
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(46, 230, 255, 0.08), transparent 55%),
-    radial-gradient(900px 500px at 90% 0%, rgba(245, 185, 66, 0.06), transparent 50%),
-    linear-gradient(180deg, #05080f 0%, #070d18 50%, #05080f 100%);
+    radial-gradient(
+      1200px 600px at 10% -10%,
+      color-mix(in srgb, var(--lm-cyan-bright) 12%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      900px 500px at 90% 0%,
+      color-mix(in srgb, var(--lm-amber-bright) 8%, transparent),
+      transparent 50%
+    ),
+    linear-gradient(180deg, var(--lm-bg) 0%, var(--lm-bg-mid) 50%, var(--lm-bg) 100%);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   min-height: 100vh;
+  transition: background 0.2s ease, color 0.15s ease;
 }
 
-/* scanline overlay */
 .lm-scanlines::after {
   content: "";
   pointer-events: none;
@@ -50,35 +147,43 @@ body {
   mix-blend-mode: multiply;
 }
 
+html[data-theme="light"] .lm-scanlines::after {
+  opacity: 0.08;
+}
+
 .lm-grid {
   background-image:
-    linear-gradient(rgba(46, 230, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(46, 230, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(var(--lm-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--lm-grid) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
 .lm-panel {
-  background: linear-gradient(180deg, rgba(13, 24, 41, 0.92), rgba(10, 18, 32, 0.96));
+  background: linear-gradient(180deg, var(--lm-panel-grad-a), var(--lm-panel-grad-b));
   border: 1px solid var(--lm-border);
   box-shadow:
-    0 0 0 1px rgba(46, 230, 255, 0.04) inset,
-    0 12px 40px rgba(0, 0, 0, 0.35);
+    0 0 0 1px color-mix(in srgb, var(--lm-cyan-bright) 4%, transparent) inset,
+    0 12px 40px var(--lm-shadow);
 }
 
 .lm-glow {
-  text-shadow: 0 0 12px rgba(46, 230, 255, 0.45);
+  text-shadow: 0 0 12px var(--lm-glow);
+}
+
+html[data-theme="light"] .lm-glow {
+  text-shadow: none;
 }
 
 .lm-btn {
   @apply inline-flex items-center justify-center gap-2 rounded px-3 py-2 text-sm font-medium transition;
-  border: 1px solid rgba(46, 230, 255, 0.35);
-  background: linear-gradient(180deg, rgba(46, 230, 255, 0.16), rgba(46, 230, 255, 0.05));
-  color: var(--lm-cyan);
+  border: 1px solid var(--lm-btn-border);
+  background: linear-gradient(180deg, var(--lm-btn-bg-a), var(--lm-btn-bg-b));
+  color: var(--lm-accent-display);
 }
 
 .lm-btn:hover {
-  border-color: rgba(46, 230, 255, 0.7);
-  background: linear-gradient(180deg, rgba(46, 230, 255, 0.28), rgba(46, 230, 255, 0.1));
+  border-color: var(--lm-btn-hover-border);
+  filter: brightness(1.05);
 }
 
 .lm-btn:disabled {
@@ -87,21 +192,25 @@ body {
 }
 
 .lm-btn-amber {
-  border-color: rgba(245, 185, 66, 0.4);
-  background: linear-gradient(180deg, rgba(245, 185, 66, 0.18), rgba(245, 185, 66, 0.05));
-  color: var(--lm-amber);
+  border-color: color-mix(in srgb, var(--lm-amber-bright) 40%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--lm-amber-bright) 18%, transparent),
+    color-mix(in srgb, var(--lm-amber-bright) 5%, transparent)
+  );
+  color: var(--lm-amber-bright);
 }
 
 .lm-input {
   @apply w-full rounded px-3 py-2 text-sm outline-none;
-  background: rgba(5, 12, 22, 0.9);
+  background: var(--lm-input-bg);
   border: 1px solid var(--lm-border);
   color: var(--lm-text);
 }
 
 .lm-input:focus {
-  border-color: rgba(46, 230, 255, 0.55);
-  box-shadow: 0 0 0 3px rgba(46, 230, 255, 0.12);
+  border-color: color-mix(in srgb, var(--lm-cyan-bright) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--lm-cyan-bright) 12%, transparent);
 }
 
 .lm-badge {
@@ -111,24 +220,23 @@ body {
 }
 
 .lm-badge-live {
-  border-color: rgba(61, 255, 154, 0.4);
-  color: var(--lm-green);
-  background: rgba(61, 255, 154, 0.08);
+  border-color: color-mix(in srgb, var(--lm-green-bright) 40%, transparent);
+  color: var(--lm-green-bright);
+  background: color-mix(in srgb, var(--lm-green-bright) 8%, transparent);
 }
 
 .lm-badge-warn {
-  border-color: rgba(245, 185, 66, 0.4);
-  color: var(--lm-amber);
-  background: rgba(245, 185, 66, 0.08);
+  border-color: color-mix(in srgb, var(--lm-amber-bright) 40%, transparent);
+  color: var(--lm-amber-bright);
+  background: color-mix(in srgb, var(--lm-amber-bright) 8%, transparent);
 }
 
 .lm-badge-crit {
-  border-color: rgba(255, 77, 106, 0.45);
-  color: var(--lm-red);
-  background: rgba(255, 77, 106, 0.08);
+  border-color: color-mix(in srgb, var(--lm-red-bright) 45%, transparent);
+  color: var(--lm-red-bright);
+  background: color-mix(in srgb, var(--lm-red-bright) 8%, transparent);
 }
 
-/* custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -137,7 +245,7 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1a2d4a;
+  background: var(--lm-scroll);
   border-radius: 4px;
 }
 
@@ -155,10 +263,25 @@ body {
   animation: pulse-dot 1.6s ease-in-out infinite;
 }
 
-/* Real map (Leaflet) — keep tiles above dark console chrome */
+/* Semantic text helpers that follow theme */
+.text-cyan-300,
+.text-cyan-200 {
+  color: var(--lm-accent-display) !important;
+}
+html[data-theme="light"] .text-cyan-300,
+html[data-theme="light"] .text-cyan-200 {
+  color: var(--lm-cyan) !important;
+}
+
+.lm-header-bar {
+  background: var(--lm-header);
+  border-color: var(--lm-border);
+}
+
+/* Real map (Leaflet) */
 .leaflet-container {
   font: inherit;
-  background: #0a0f14;
+  background: var(--lm-map-bg);
   z-index: 0;
 }
 .leaflet-pane,
@@ -170,28 +293,38 @@ body {
   z-index: 500;
 }
 .leaflet-popup-content-wrapper {
-  background: #0d1829;
-  color: #d7e6f7;
-  border: 1px solid #1a2d4a;
+  background: var(--lm-panel);
+  color: var(--lm-text);
+  border: 1px solid var(--lm-border);
   border-radius: 6px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 8px 24px var(--lm-shadow);
 }
 .leaflet-popup-tip {
-  background: #0d1829;
+  background: var(--lm-panel);
 }
 .leaflet-popup-content a {
-  color: #2ee6ff;
+  color: var(--lm-accent-display);
 }
 .leaflet-control-attribution {
-  background: rgba(5, 8, 15, 0.75) !important;
-  color: #7f98b3 !important;
+  background: color-mix(in srgb, var(--lm-bg) 75%, transparent) !important;
+  color: var(--lm-muted) !important;
   font-size: 10px !important;
 }
 .leaflet-control-attribution a {
-  color: #2ee6ff !important;
+  color: var(--lm-accent-display) !important;
 }
 .leaflet-control-zoom a {
-  background: #0d1829 !important;
-  color: #2ee6ff !important;
-  border-color: #1a2d4a !important;
+  background: var(--lm-panel) !important;
+  color: var(--lm-accent-display) !important;
+  border-color: var(--lm-border) !important;
+}
+
+/* Kanban hermes board tokens follow theme when possible */
+html[data-theme="light"] .hermes-board {
+  --hb-bg: #f1f5f9;
+  --hb-panel: #ffffff;
+  --hb-border: #cbd5e1;
+  --hb-muted: #64748b;
+  --hb-text: #0f172a;
+  --hb-accent: #0e7490;
 }

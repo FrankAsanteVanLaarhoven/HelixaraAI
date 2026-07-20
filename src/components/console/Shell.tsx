@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { useI18n } from "@/modules/i18n/context";
 import type { MessageKey } from "@/modules/i18n/locales";
 import type { LocaleCode } from "@/modules/i18n/locales";
+import { ThemeToggle } from "@/components/console/ThemeToggle";
 
 const NAV: { href: string; key: MessageKey; icon: typeof LayoutDashboard }[] = [
   { href: "/console", key: "nav.command", icon: LayoutDashboard },
@@ -62,14 +63,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen lm-grid" dir={dir}>
-      <header className="sticky top-0 z-40 border-b border-[var(--lm-border)] bg-[#05080fcc] backdrop-blur-md">
+      <header className="lm-header-bar sticky top-0 z-40 border-b backdrop-blur-md">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 px-4 py-3">
           <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded border border-cyan-400/40 bg-cyan-400/10">
-              <Shield className="h-5 w-5 text-cyan-300" />
+            <div className="flex h-9 w-9 items-center justify-center rounded border border-[var(--lm-btn-border)] bg-[var(--lm-btn-bg-a)]">
+              <Shield className="h-5 w-5 text-[var(--lm-accent-display)]" />
             </div>
             <div>
-              <div className="text-sm font-semibold tracking-[0.12em] text-cyan-300 lm-glow">
+              <div className="text-sm font-semibold tracking-[0.12em] text-[var(--lm-accent-display)] lm-glow">
                 {t("app.name")}
               </div>
               <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--lm-muted)]">
@@ -80,13 +81,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
           <div className="flex flex-wrap items-center gap-3 text-[11px] text-[var(--lm-muted)]">
             <span className="hidden items-center gap-1.5 sm:flex">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--lm-green)] lm-pulse" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--lm-green-bright)] lm-pulse" />
               {t("status.systems")}
             </span>
             <span className="hidden items-center gap-1.5 md:flex">
               <Activity className="h-3.5 w-3.5" />
               :3007
             </span>
+            <ThemeToggle />
             <span className="lm-badge lm-badge-warn">{t("status.roe")}</span>
 
             <label className="flex items-center gap-1">

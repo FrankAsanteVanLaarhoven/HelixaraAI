@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/modules/i18n/context";
 import type { LocaleCode } from "@/modules/i18n/locales";
+import { ThemeToggle } from "@/components/console/ThemeToggle";
 
 export default function HomePage() {
   const { t, locale, setLocale, locales, dir } = useI18n();
@@ -20,21 +21,24 @@ export default function HomePage() {
     <div className="min-h-screen lm-grid" dir={dir}>
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-16">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-cyan-300/80">
+          <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-[var(--lm-accent-display)]">
             <Shield className="h-4 w-4" />
             {t("app.name")} v0.2 · {t("app.authorized")} · :3007
           </div>
-          <select
-            className="lm-input w-auto text-xs"
-            value={locale}
-            onChange={(e) => setLocale(e.target.value as LocaleCode)}
-          >
-            {locales.map((l) => (
-              <option key={l.code} value={l.code}>
-                {l.name}
-              </option>
-            ))}
-          </select>
+          <div className="flex flex-wrap items-center gap-2">
+            <ThemeToggle />
+            <select
+              className="lm-input w-auto text-xs"
+              value={locale}
+              onChange={(e) => setLocale(e.target.value as LocaleCode)}
+            >
+              {locales.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-[var(--lm-text)] md:text-5xl">

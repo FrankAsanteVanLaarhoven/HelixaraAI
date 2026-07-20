@@ -10,6 +10,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useTheme } from "@/modules/theme/context";
 
 export type MapPoint = {
   id: string;
@@ -31,10 +32,15 @@ const KIND_COLOR: Record<string, string> = {
   airport: "#7f98b3",
 };
 
-/** Dark basemap tiles (Carto Dark Matter — free, real world geography) */
+/** Real basemap tiles — dark/light variants for app theme */
 const TILES: Record<string, { url: string; attr: string }> = {
   standard: {
     url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    attr:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+  },
+  standard_light: {
+    url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
     attr:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
   },
@@ -104,7 +110,10 @@ export function RealMap({
   mode?: string;
   className?: string;
 }) {
-  const tile = TILES[mode] || TILES.standard;
+  const { resolved } = useTheme();
+  const tileKey =
+    mode === "standard" && resolved === "light" ? "standard_light" : mode;
+  const tile = TILES[tileKey] || TILES.standard;
   const validPoints = useMemo(
     () =>
       points.filter(
@@ -132,10 +141,15 @@ export function RealMap({
         minZoom={1}
         maxZoom={18}
         scrollWheelZoom
-        style={{ height: "100%", width: "100%", background: "#0a0f14" }}
+        style={{
+          height: "100%",
+          width: "100%",
+          background: "var(--lm-map-bg)",
+        }}
         worldCopyJump
       >
         <TileLayer
+          key={tile.url}
           attribution={tile.attr}
           url={tile.url}
           subdomains="abcd"
