@@ -39,6 +39,8 @@ export type MessageKey =
   | "nav.kanban"
   | "nav.telemetry"
   | "nav.wireless"
+  | "nav.wids"
+  | "nav.labwifi"
   | "nav.globe"
   | "nav.audit"
   | "nav.capabilities"
@@ -122,6 +124,8 @@ const en: Catalog = {
   "nav.kanban": "Kanban Team",
   "nav.telemetry": "Telemetry Map",
   "nav.wireless": "Wi‑Fi Lab",
+  "nav.wids": "WIDS Deauth",
+  "nav.labwifi": "Lab Sim",
   "nav.globe": "Geospatial",
   "nav.audit": "Audit",
   "nav.capabilities": "Capabilities",

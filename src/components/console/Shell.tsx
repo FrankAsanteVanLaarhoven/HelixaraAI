@@ -19,6 +19,8 @@ import {
   Radar,
   ScrollText,
   Shield,
+  FlaskConical,
+  ShieldAlert,
   Wifi,
   Zap,
 } from "lucide-react";
@@ -36,6 +38,8 @@ const NAV: { href: string; key: MessageKey; icon: typeof LayoutDashboard }[] = [
   { href: "/console/kanban", key: "nav.kanban", icon: Columns3 },
   { href: "/console/telemetry", key: "nav.telemetry", icon: MapPinned },
   { href: "/console/wireless", key: "nav.wireless", icon: Wifi },
+  { href: "/console/wids", key: "nav.wids", icon: ShieldAlert },
+  { href: "/console/lab-wifi", key: "nav.labwifi", icon: FlaskConical },
   { href: "/console/globe", key: "nav.globe", icon: Globe2 },
   { href: "/console/events", key: "nav.events", icon: Zap },
   { href: "/console/intelligence", key: "nav.intelligence", icon: Newspaper },

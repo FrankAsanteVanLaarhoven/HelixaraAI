@@ -159,9 +159,28 @@ export default function WirelessPage() {
         </button>
       </div>
 
-      <div className="rounded border border-amber-400/30 bg-amber-400/5 p-3 text-xs text-amber-100/90">
-        {scan?.policy ||
-          "Passive discovery only for networks you own or are authorized to assess."}
+      <div className="space-y-2">
+        <div className="rounded border border-rose-400/40 bg-rose-500/10 p-3 text-xs leading-relaxed text-rose-50/95">
+          <strong>(a) Controlled lab / defensive use only.</strong>{" "}
+          <strong>(b) Safeguards:</strong> passive scan + ROE-gated selection;
+          no deauth TX, no evil twin.{" "}
+          <strong>(c) Law:</strong> UK <em>Computer Misuse Act 1990</em> — unauthorised
+          access or acts impairing systems/networks (including wireless disruption of
+          third parties) can be criminal. Deploy only with ownership/ROE and local
+          counsel. See also{" "}
+          <a className="underline text-cyan-200" href="/console/wids">
+            WIDS
+          </a>{" "}
+          and{" "}
+          <a className="underline text-cyan-200" href="/console/lab-wifi">
+            lab simulator
+          </a>
+          .
+        </div>
+        <div className="rounded border border-amber-400/30 bg-amber-400/5 p-3 text-xs text-amber-100/90">
+          {scan?.policy ||
+            "Passive discovery only for networks you own or are authorized to assess."}
+        </div>
       </div>
 
       {error ? <p className="text-sm text-rose-300">{error}</p> : null}
