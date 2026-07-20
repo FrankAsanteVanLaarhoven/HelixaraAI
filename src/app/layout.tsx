@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { I18nProvider } from "@/modules/i18n/context";
 import { ThemeProvider } from "@/modules/theme/context";
 import { PwaRegister } from "@/components/PwaRegister";
+import { ThemeBoot } from "@/components/ThemeBoot";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -60,9 +60,6 @@ export const viewport: Viewport = {
   colorScheme: "dark light",
 };
 
-/** Avoid flash of wrong theme before hydration (Next Script beforeInteractive) */
-const themeBootScript = `(function(){try{var p=localStorage.getItem('helixara.theme')||'system';var r=p==='system'?(window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):p;document.documentElement.dataset.theme=r;document.documentElement.dataset.themePref=p;document.documentElement.style.colorScheme=r;}catch(e){}})();`;
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -70,12 +67,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      {/*
+        Theme boot is NOT a React <script> child (React 19 never executes those).
+        Injected via native DOM in ThemeBoot once on the client, plus ThemeProvider.
+      */}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Script
-          id="helixara-theme-boot"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: themeBootScript }}
-        />
+        <ThemeBoot />
         <ThemeProvider>
           <I18nProvider>
             {children}
