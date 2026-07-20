@@ -3,13 +3,19 @@ import { getLiveGeospatialSnapshot } from "@/modules/geospatial/live";
 import { getGeospatialSnapshot } from "@/lib/geospatial/feeds";
 import { appendAudit } from "@/lib/audit/logger";
 import { demoOperator } from "@/lib/ethics/guardrails";
+import { cacheWrap, noStoreHeaders } from "@/lib/cache/runtime";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   const operator = demoOperator();
   try {
-    const live = await getLiveGeospatialSnapshot();
+    const live = await cacheWrap(
+      "geo:live:v1",
+      12_000,
+      () => getLiveGeospatialSnapshot(),
+      ["geospatial"]
+    );
     await appendAudit({
       operatorId: operator.operatorId,
       action: "geospatial.live",
@@ -91,18 +97,25 @@ export async function GET() {
       },
     ];
 
-    return NextResponse.json({
-      generatedAt: live.generatedAt,
-      modes: ["standard", "night", "crt", "thermal"],
-      layers,
-      regions: live.regions,
-      sources: live.sources,
-      benchmarks: live.benchmarks,
-      entityCount: live.entities.length,
-    });
+    return NextResponse.json(
+      {
+        generatedAt: live.generatedAt,
+        modes: ["standard", "night", "crt", "thermal"],
+        layers,
+        regions: live.regions,
+        sources: live.sources,
+        benchmarks: live.benchmarks,
+        entityCount: live.entities.length,
+        cached: true,
+      },
+      { headers: noStoreHeaders() }
+    );
   } catch {
     // fallback demo layers
     const snap = getGeospatialSnapshot();
-    return NextResponse.json({ ...snap, fallback: true });
+    return NextResponse.json(
+      { ...snap, fallback: true },
+      { headers: noStoreHeaders() }
+    );
   }
 }

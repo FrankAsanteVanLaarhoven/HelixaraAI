@@ -1,8 +1,11 @@
 {
   "name": "helixaraai",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
-  "description": "HelixaraAI console",
+  "description": "HelixaraAI console — PWA, SDK, WebRTC/WebGL live ops",
+  "exports": {
+    "./sdk": "./src/sdk/index.ts"
+  },
   "scripts": {
     "dev": "next dev -p 3007",
     "dev:3007": "next dev -p 3007",

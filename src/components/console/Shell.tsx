@@ -28,6 +28,7 @@ import {
   Swords,
   Wifi,
   Zap,
+  Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/modules/i18n/context";
@@ -53,6 +54,7 @@ const NAV: { href: string; key: MessageKey; icon: typeof LayoutDashboard }[] = [
   { href: "/console/redteam/workspace?side=red", key: "nav.rtWs", icon: LayoutDashboard },
   { href: "/console/kanban", key: "nav.kanban", icon: Columns3 },
   { href: "/console/telemetry", key: "nav.telemetry", icon: MapPinned },
+  { href: "/console/live", key: "nav.live", icon: Video },
   { href: "/console/wireless", key: "nav.wireless", icon: Wifi },
   { href: "/console/wids", key: "nav.wids", icon: ShieldAlert },
   { href: "/console/lab-wifi", key: "nav.labwifi", icon: FlaskConical },

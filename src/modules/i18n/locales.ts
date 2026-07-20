@@ -49,6 +49,7 @@ export type MessageKey =
   | "nav.elevated"
   | "nav.kanban"
   | "nav.telemetry"
+  | "nav.live"
   | "nav.wireless"
   | "nav.wids"
   | "nav.labwifi"
@@ -146,6 +147,7 @@ const en: Catalog = {
   "nav.elevated": "Elevated Auth",
   "nav.kanban": "Kanban Team",
   "nav.telemetry": "Telemetry Map",
+  "nav.live": "Live WebRTC",
   "nav.wireless": "Wi‑Fi Lab",
   "nav.wids": "WIDS Deauth",
   "nav.labwifi": "Lab Sim",
