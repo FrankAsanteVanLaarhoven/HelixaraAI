@@ -23,6 +23,10 @@ export async function GET() {
       scrape: true,
       osint: true,
       hermes: true,
+      redteam: {
+        scope: "roe-recon-osint-report",
+        offensive: false,
+      },
       hermesNative: {
         ok: hermesNative.ok,
         version: hermesNative.version,

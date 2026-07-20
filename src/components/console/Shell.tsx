@@ -24,6 +24,7 @@ import {
   Brain,
   Settings,
   ShieldAlert,
+  Swords,
   Wifi,
   Zap,
 } from "lucide-react";
@@ -41,6 +42,7 @@ const NAV: { href: string; key: MessageKey; icon: typeof LayoutDashboard }[] = [
   { href: "/console/scrape", key: "nav.scrape", icon: Eye },
   { href: "/console/osint", key: "nav.osint", icon: FileSearch },
   { href: "/console/missions", key: "nav.agents", icon: Bot },
+  { href: "/console/redteam", key: "nav.redteam", icon: Swords },
   { href: "/console/kanban", key: "nav.kanban", icon: Columns3 },
   { href: "/console/telemetry", key: "nav.telemetry", icon: MapPinned },
   { href: "/console/wireless", key: "nav.wireless", icon: Wifi },

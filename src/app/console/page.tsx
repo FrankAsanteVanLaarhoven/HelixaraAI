@@ -15,6 +15,7 @@ import {
   Newspaper,
   Orbit,
   ScrollText,
+  Swords,
   Wifi,
   Zap,
 } from "lucide-react";
@@ -33,6 +34,7 @@ const QUICK: { href: string; icon: typeof Eye; titleKey: MessageKey }[] = [
   { href: "/console/scrape", icon: Eye, titleKey: "nav.scrape" },
   { href: "/console/osint", icon: FileSearch, titleKey: "nav.osint" },
   { href: "/console/missions", icon: Bot, titleKey: "nav.agents" },
+  { href: "/console/redteam", icon: Swords, titleKey: "nav.redteam" },
   { href: "/console/twins", icon: Orbit, titleKey: "nav.twins" },
   { href: "/console/wireless", icon: Wifi, titleKey: "nav.wireless" },
   { href: "/console/events", icon: Zap, titleKey: "nav.events" },
