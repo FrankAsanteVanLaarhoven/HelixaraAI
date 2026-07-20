@@ -319,6 +319,155 @@ html[data-theme="light"] .text-cyan-200 {
   border-color: var(--lm-border) !important;
 }
 
+/* Military / NASA ops map markers + HUD */
+.hx-map-marker {
+  background: transparent !important;
+  border: none !important;
+}
+.hx-marker-wrap {
+  position: relative;
+  display: block;
+  width: var(--s, 16px);
+  height: var(--s, 16px);
+}
+.hx-marker-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--core, 5px);
+  height: var(--core, 5px);
+  margin: calc(var(--core, 5px) / -2) 0 0 calc(var(--core, 5px) / -2);
+  border-radius: 50%;
+  background: var(--c, #2ee6ff);
+  box-shadow: 0 0 8px var(--c, #2ee6ff), 0 0 2px #fff;
+  z-index: 2;
+}
+.hx-marker-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--c, #2ee6ff);
+  opacity: 0.85;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--c, #2ee6ff) 55%, transparent);
+  animation: hx-marker-pulse 2.2s ease-out infinite;
+}
+@keyframes hx-marker-pulse {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.95;
+  }
+  70% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+.hx-ops-map .leaflet-control-attribution {
+  display: none;
+}
+
+.hx-map-hud-corners {
+  pointer-events: none;
+  position: absolute;
+  inset: 10px;
+  z-index: 1000;
+  border: 1px solid rgba(46, 230, 255, 0.18);
+  box-shadow:
+    inset 0 0 40px rgba(0, 20, 40, 0.35),
+    0 0 0 1px rgba(0, 0, 0, 0.4);
+}
+.hx-map-hud-corners::before,
+.hx-map-hud-corners::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: rgba(46, 230, 255, 0.75);
+  border-style: solid;
+}
+.hx-map-hud-corners::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+.hx-map-hud-corners::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.hx-map-scan {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.07) 4px
+  );
+  opacity: 0.45;
+  mix-blend-mode: multiply;
+}
+
+.hx-map-hud-top {
+  pointer-events: none;
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(180, 240, 255, 0.92);
+  background: rgba(4, 12, 22, 0.72);
+  border: 1px solid rgba(46, 230, 255, 0.28);
+  backdrop-filter: blur(6px);
+  text-shadow: 0 0 10px rgba(46, 230, 255, 0.45);
+}
+.hx-map-hud-bottom {
+  pointer-events: none;
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  padding: 4px 12px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(160, 220, 240, 0.85);
+  background: rgba(4, 12, 22, 0.72);
+  border: 1px solid rgba(46, 230, 255, 0.22);
+  backdrop-filter: blur(6px);
+  font-variant-numeric: tabular-nums;
+}
+.hx-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3dff9a;
+  box-shadow: 0 0 8px #3dff9a;
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+.hx-hud-sep {
+  opacity: 0.4;
+}
+
 /* Kanban hermes board tokens follow theme when possible */
 html[data-theme="light"] .hermes-board {
   --hb-bg: #f1f5f9;

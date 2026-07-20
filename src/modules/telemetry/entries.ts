@@ -26,14 +26,14 @@ export interface TelemetryEntry {
 const entries: TelemetryEntry[] = [];
 const MAX = 200;
 
-/** Seed a few authorized ops pins so the map is never empty */
+/** Seed authorized ops pins across regions so the map is never empty */
 function seedIfEmpty() {
   if (entries.length) return;
   const now = Date.now();
   const seeds: Omit<TelemetryEntry, "id" | "shortId">[] = [
     {
       ts: new Date(now - 3600_000).toISOString(),
-      label: "HelixaraAI Node · London SOC",
+      label: "Node · London SOC",
       kind: "ops",
       ip: "ops-edge",
       os: "linux",
@@ -44,7 +44,7 @@ function seedIfEmpty() {
     },
     {
       ts: new Date(now - 7200_000).toISOString(),
-      label: "HelixaraAI Node · Dublin Edge",
+      label: "Node · Dublin Edge",
       kind: "ops",
       ip: "ops-edge",
       os: "linux",
@@ -54,11 +54,67 @@ function seedIfEmpty() {
     },
     {
       ts: new Date(now - 1800_000).toISOString(),
-      label: "HelixaraAI Node · Cork Lab",
+      label: "Node · New York SOC",
       kind: "ops",
-      place: "Cork, IE",
-      lat: 51.8985,
-      lon: -8.4756,
+      place: "New York, US",
+      lat: 40.7128,
+      lon: -74.006,
+    },
+    {
+      ts: new Date(now - 2400_000).toISOString(),
+      label: "Node · Singapore Hub",
+      kind: "ops",
+      place: "Singapore",
+      lat: 1.3521,
+      lon: 103.8198,
+    },
+    {
+      ts: new Date(now - 3000_000).toISOString(),
+      label: "Node · Tokyo Edge",
+      kind: "ops",
+      place: "Tokyo, JP",
+      lat: 35.6762,
+      lon: 139.6503,
+    },
+    {
+      ts: new Date(now - 4000_000).toISOString(),
+      label: "Node · Dubai SOC",
+      kind: "ops",
+      place: "Dubai, AE",
+      lat: 25.2048,
+      lon: 55.2708,
+    },
+    {
+      ts: new Date(now - 4500_000).toISOString(),
+      label: "Node · São Paulo Edge",
+      kind: "ops",
+      place: "São Paulo, BR",
+      lat: -23.5505,
+      lon: -46.6333,
+    },
+    {
+      ts: new Date(now - 5000_000).toISOString(),
+      label: "Node · Sydney Hub",
+      kind: "ops",
+      place: "Sydney, AU",
+      lat: -33.8688,
+      lon: 151.2093,
+    },
+    {
+      ts: new Date(now - 5200_000).toISOString(),
+      label: "Node · Johannesburg Edge",
+      kind: "ops",
+      place: "Johannesburg, ZA",
+      lat: -26.2041,
+      lon: 28.0473,
+    },
+    {
+      ts: new Date(now - 5600_000).toISOString(),
+      label: "Node · Mumbai SOC",
+      kind: "ops",
+      place: "Mumbai, IN",
+      lat: 19.076,
+      lon: 72.8777,
     },
   ];
   for (const s of seeds) {

@@ -202,23 +202,31 @@ async function fetchSatelliteFallbacks(): Promise<LiveEntity[]> {
   return entities;
 }
 
-async function fetchOpenSky(): Promise<LiveEntity[]> {
-  // OpenSky Network — free ADS-B state vectors (rate limited)
-  const res = await fetch(
-    "https://opensky-network.org/api/states/all?lamin=20&lomin=-130&lamax=55&lomax=30",
-    {
-      headers: { "User-Agent": "HelixaraAI/0.1" },
-      signal: AbortSignal.timeout(15_000),
-    }
-  );
-  if (!res.ok) throw new Error(`OpenSky HTTP ${res.status}`);
+/** Regional OpenSky bboxes for worldwide ADS-B (API is rate-limited; fan-out) */
+const ADSB_BOXES = [
+  { id: "na", lamin: 15, lomin: -170, lamax: 72, lomax: -50 },
+  { id: "eu-af", lamin: -35, lomin: -25, lamax: 72, lomax: 45 },
+  { id: "me-as", lamin: -10, lomin: 45, lamax: 55, lomax: 145 },
+  { id: "apac-oc", lamin: -50, lomin: 100, lamax: 50, lomax: 180 },
+  { id: "sa", lamin: -56, lomin: -90, lamax: 15, lomax: -30 },
+];
+
+async function fetchOpenSkyBox(box: (typeof ADSB_BOXES)[number]): Promise<LiveEntity[]> {
+  const url =
+    `https://opensky-network.org/api/states/all` +
+    `?lamin=${box.lamin}&lomin=${box.lomin}&lamax=${box.lamax}&lomax=${box.lomax}`;
+  const res = await fetch(url, {
+    headers: { "User-Agent": "HelixaraAI/0.2 (+authorized research)" },
+    signal: AbortSignal.timeout(12_000),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`OpenSky ${box.id} HTTP ${res.status}`);
   const data = (await res.json()) as {
     time?: number;
     states?: (string | number | boolean | null)[][];
   };
   const entities: LiveEntity[] = [];
-  for (const s of (data.states || []).slice(0, 80)) {
-    // icao24, callsign, origin_country, time_position, last_contact, lon, lat, baro_altitude, on_ground, velocity...
+  for (const s of data.states || []) {
     const lat = s[6] as number | null;
     const lon = s[5] as number | null;
     if (lat == null || lon == null) continue;
@@ -234,6 +242,8 @@ async function fetchOpenSky(): Promise<LiveEntity[]> {
         country: String(s[2] || ""),
         onGround: Boolean(s[8]),
         velocity: Number(s[9] || 0),
+        heading: Number(s[10] || 0),
+        region: box.id,
         source: "opensky",
       },
       source: "opensky-network",
@@ -241,6 +251,25 @@ async function fetchOpenSky(): Promise<LiveEntity[]> {
     });
   }
   return entities;
+}
+
+async function fetchOpenSky(): Promise<LiveEntity[]> {
+  // Parallel regional pulls for global coverage; cap total for map performance
+  const results = await Promise.allSettled(ADSB_BOXES.map((b) => fetchOpenSkyBox(b)));
+  const byId = new Map<string, LiveEntity>();
+  for (const r of results) {
+    if (r.status !== "fulfilled") continue;
+    for (const e of r.value) {
+      if (!byId.has(e.id)) byId.set(e.id, e);
+    }
+  }
+  const all = [...byId.values()];
+  // Prefer airborne, then sample evenly for density across regions
+  const airborne = all.filter((e) => !e.meta.onGround);
+  const pool = airborne.length ? airborne : all;
+  if (pool.length <= 160) return pool;
+  const step = Math.ceil(pool.length / 160);
+  return pool.filter((_, i) => i % step === 0).slice(0, 160);
 }
 
 const REGIONS = [
@@ -289,7 +318,21 @@ const AIRPORTS: LiveEntity[] = [
   ts: new Date().toISOString(),
 }));
 
-export async function getLiveGeospatialSnapshot(): Promise<LiveSnapshot> {
+let liveCache: { at: number; snap: LiveSnapshot } | null = null;
+const LIVE_CACHE_MS = 18_000;
+
+export async function getLiveGeospatialSnapshot(
+  opts?: { force?: boolean }
+): Promise<LiveSnapshot> {
+  if (
+    !opts?.force &&
+    liveCache &&
+    Date.now() - liveCache.at < LIVE_CACHE_MS
+  ) {
+    // Re-propagate satellite positions on cache hit so map stays live between fetches
+    return refreshSatellitePhases(liveCache.snap);
+  }
+
   const sources: LiveSnapshot["sources"] = [];
   let twinEntities: LiveEntity[] = [];
   try {
@@ -306,12 +349,20 @@ export async function getLiveGeospatialSnapshot(): Promise<LiveSnapshot> {
     detail: `${twinEntities.length} live twins (poll + event sync)`,
   });
 
-  // Satellite groups — public NORAD GP (CelesTrak) in parallel with tight timeouts
+  // Satellite groups — public NORAD GP (CelesTrak) covering all mission bands
   const groups = [
-    { id: "stations", limit: 10 },
-    { id: "weather", limit: 12 },
-    { id: "gps-ops", limit: 10 },
-    { id: "starlink", limit: 15 },
+    { id: "stations", limit: 16 },
+    { id: "weather", limit: 18 },
+    { id: "gps-ops", limit: 16 },
+    { id: "galileo", limit: 12 },
+    { id: "glonass-ops", limit: 12 },
+    { id: "science", limit: 14 },
+    { id: "resource", limit: 12 },
+    { id: "geo", limit: 14 },
+    { id: "starlink", limit: 24 },
+    { id: "oneweb", limit: 12 },
+    { id: "iridium-NEXT", limit: 12 },
+    { id: "active", limit: 20 },
   ];
 
   const groupResults = await Promise.all(
@@ -333,7 +384,10 @@ export async function getLiveGeospatialSnapshot(): Promise<LiveSnapshot> {
   for (const r of groupResults) {
     if (r.tles.length) {
       r.tles.forEach((t, i) => {
-        const pos = roughPositionFromTle(t.l1, t.l2, i + r.g.id.length);
+        const seed = i + r.g.id.length;
+        const pos = roughPositionFromTle(t.l1, t.l2, seed);
+        const n = parseFloat(t.l2.slice(52, 63)) || 15;
+        const inclination = parseFloat(t.l2.slice(8, 16)) || 51;
         entities.push({
           id: `sat-${r.g.id}-${i}-${t.name.slice(0, 12).replace(/\s+/g, "_")}`,
           kind: "satellite",
@@ -345,6 +399,11 @@ export async function getLiveGeospatialSnapshot(): Promise<LiveSnapshot> {
             group: r.g.id,
             catalog: "celestrak-norad-gp",
             public: true,
+            meanMotion: n,
+            inclination,
+            seed,
+            tle1: t.l1,
+            tle2: t.l2,
           },
           source: "celestrak",
           ts: now,
@@ -405,7 +464,7 @@ export async function getLiveGeospatialSnapshot(): Promise<LiveSnapshot> {
     sources.push({
       id: "opensky",
       status: "ok",
-      detail: `${flights.length} ADS-B states (regional bbox)`,
+      detail: `${flights.length} ADS-B states (global multi-region)`,
     });
     emitEvent({
       type: "flight.updated",
@@ -433,15 +492,7 @@ export async function getLiveGeospatialSnapshot(): Promise<LiveSnapshot> {
     },
   });
 
-  emitEvent({
-    type: "twin.synced",
-    source: "digital-twins",
-    severity: "info",
-    title: "Ops digital twins on globe",
-    payload: { twins: twinEntities.length },
-  });
-
-  return {
+  const snap: LiveSnapshot = {
     generatedAt: now,
     sources,
     entities,
@@ -454,7 +505,7 @@ export async function getLiveGeospatialSnapshot(): Promise<LiveSnapshot> {
       },
       {
         name: "ADS-B source",
-        value: "OpenSky Network",
+        value: "OpenSky Network (global boxes)",
         industry: "Civil aviation research-grade",
       },
       {
@@ -474,6 +525,37 @@ export async function getLiveGeospatialSnapshot(): Promise<LiveSnapshot> {
       },
     ],
   };
+  liveCache = { at: Date.now(), snap };
+  return snap;
+}
+
+/** Update satellite lat/lon from cached TLE meta so the map animates between API pulls */
+function refreshSatellitePhases(snap: LiveSnapshot): LiveSnapshot {
+  const now = new Date().toISOString();
+  const entities = snap.entities.map((e) => {
+    if (e.kind !== "satellite") return e;
+    const tle1 = e.meta.tle1;
+    const tle2 = e.meta.tle2;
+    if (typeof tle1 === "string" && typeof tle2 === "string") {
+      const seed = Number(e.meta.seed ?? 0);
+      const pos = roughPositionFromTle(tle1, tle2, seed);
+      return { ...e, lat: pos.lat, lon: pos.lon, altKm: pos.altKm, ts: now };
+    }
+    // Phase drift for non-TLE sats (ISS open-notify is re-fetched on full refresh)
+    if (typeof e.meta.meanMotion === "number") {
+      const seed = Number(e.meta.seed ?? 1);
+      const n = Number(e.meta.meanMotion) || 15;
+      const inclination = Number(e.meta.inclination) || 51;
+      const periodMin = 1440 / n;
+      const t = Date.now() / 60000 + seed * 17;
+      const phase = (t / periodMin) * Math.PI * 2;
+      const lat = Math.sin(phase) * Math.min(inclination, 80) * 0.9;
+      const lon = ((((t / periodMin) * 360 + seed * 40) % 360) + 360) % 360 - 180;
+      return { ...e, lat, lon, ts: now };
+    }
+    return e;
+  });
+  return { ...snap, generatedAt: now, entities };
 }
 
 /** @deprecated use /api/v1/twins runtime */
