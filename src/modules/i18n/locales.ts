@@ -143,35 +143,27 @@ const en: Catalog = {
   "status.online": "API ONLINE",
   "status.roe": "ROE REQUIRED",
   "status.systems": "SYSTEMS NOMINAL",
-  "home.hero": "Sovereign command for ethical OSINT, stealth crawl, and mission intelligence.",
-  "home.sub":
-    "Modular production console: live satellites, ADS-B, Hermes & OpenClaw agents, Llama 3.1 / ChatGPT training, quantum hybrids, digital twins, full localization.",
-  "home.cta.console": "Enter Command Console",
-  "home.cta.capabilities": "Capability Matrix",
+  "home.hero": "HelixaraAI",
+  "home.sub": "",
+  "home.cta.console": "Open console",
+  "home.cta.capabilities": "Modules",
   "home.card.scrape": "Stealth Crawl",
-  "home.card.scrape.desc":
-    "Dynamic stealth scraping with robots awareness, proxy tiers, and audit-first design.",
-  "home.card.osint": "Ethical OSINT",
-  "home.card.osint.desc":
-    "DNS, CT logs, headers. Dark-web channel authorization-gated.",
-  "home.card.agents": "Hermes + OpenClaw",
-  "home.card.agents.desc":
-    "Multi-agent swarms with Ollama Llama 3.1 and ChatGPT training hooks.",
-  "home.card.globe": "Live Earth Globe",
-  "home.card.globe.desc":
-    "CelesTrak NORAD GP satellites, OpenSky flights, hubs, twins, all regions.",
-  "home.scope":
-    "Hard scope: lawful OSINT and authorized security testing only. Full-site translations, live feeds, and stealth crawl for enterprise production use.",
-  "console.title": "Command Overview",
-  "console.subtitle":
-    "Unified dashboard for stealth crawl, OSINT fusion, agent missions, and geospatial awareness.",
+  "home.card.scrape.desc": "",
+  "home.card.osint": "OSINT",
+  "home.card.osint.desc": "",
+  "home.card.agents": "Agents",
+  "home.card.agents.desc": "",
+  "home.card.globe": "Globe",
+  "home.card.globe.desc": "",
+  "home.scope": "",
+  "console.title": "Command",
+  "console.subtitle": "",
   "console.metrics.service": "Service",
   "console.metrics.missions": "Missions",
-  "console.metrics.audit": "Audit events",
-  "console.metrics.layers": "Geo entities",
-  "console.quick": "Quick actions",
-  "console.market":
-    "Production-grade modular stack: events, multi-LLM agents, live SSA/ADS-B, i18n, weather, FX, news, quantum hybrids.",
+  "console.metrics.audit": "Audit",
+  "console.metrics.layers": "Geo",
+  "console.quick": "Modules",
+  "console.market": "",
   "scrape.title": "Cyberscrape Engine",
   "scrape.desc":
     "Enterprise self-hosted crawl with stealth sessions, robots respect, structured extraction, full audit.",

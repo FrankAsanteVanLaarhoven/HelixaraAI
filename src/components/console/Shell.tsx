@@ -153,12 +153,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="mt-6 rounded border border-[var(--lm-border)] bg-black/20 p-3 text-[11px] leading-relaxed text-[var(--lm-muted)]">
-            <div className="mb-1 font-semibold uppercase tracking-wider text-cyan-300/80">
-              {t("ethics.lock")}
-            </div>
-            {t("ethics.body")}
-          </div>
         </aside>
 
         <main className="min-w-0 flex-1">{children}</main>
