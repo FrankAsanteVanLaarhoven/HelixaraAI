@@ -28,6 +28,7 @@ export async function GET() {
       { id: "osint", name: "OSINT", status: "active" },
       { id: "hermes", name: "Hermes", status: "active" },
       { id: "redteam", name: "Red Team (ROE recon)", status: "active" },
+      { id: "bounty", name: "Bug bounty find/restore", status: "active" },
       { id: "openclaw", name: "OpenClaw", status: "integration" },
       { id: "llm", name: "LLM", status: "active" },
       { id: "live-geo", name: "Geospatial", status: "active" },

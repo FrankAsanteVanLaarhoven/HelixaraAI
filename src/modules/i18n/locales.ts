@@ -39,6 +39,7 @@ export type MessageKey =
   | "nav.osint"
   | "nav.agents"
   | "nav.redteam"
+  | "nav.bounty"
   | "nav.rtKits"
   | "nav.rtAware"
   | "nav.rtRf"
@@ -135,6 +136,7 @@ const en: Catalog = {
   "nav.osint": "OSINT",
   "nav.agents": "Agents",
   "nav.redteam": "Red Team",
+  "nav.bounty": "Bug Bounty",
   "nav.rtKits": "RT Kits",
   "nav.rtAware": "RT Awareness",
   "nav.rtRf": "RT RF Sim",

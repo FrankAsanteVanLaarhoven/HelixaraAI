@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Activity,
   Bot,
+  Bug,
   CloudSun,
   Columns3,
   Cpu,
@@ -43,6 +44,7 @@ const NAV: { href: string; key: MessageKey; icon: typeof LayoutDashboard }[] = [
   { href: "/console/osint", key: "nav.osint", icon: FileSearch },
   { href: "/console/missions", key: "nav.agents", icon: Bot },
   { href: "/console/redteam", key: "nav.redteam", icon: Swords },
+  { href: "/console/bounty", key: "nav.bounty", icon: Bug },
   { href: "/console/redteam/kits", key: "nav.rtKits", icon: FlaskConical },
   { href: "/console/redteam/awareness", key: "nav.rtAware", icon: Eye },
   { href: "/console/redteam/rf-sim", key: "nav.rtRf", icon: Wifi },

@@ -27,6 +27,10 @@ export async function GET() {
         scope: "roe-recon-osint-report",
         offensive: false,
       },
+      bounty: {
+        scope: "in-scope-find-restore",
+        checks: true,
+      },
       hermesNative: {
         ok: hermesNative.ok,
         version: hermesNative.version,

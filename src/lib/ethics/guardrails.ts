@@ -19,6 +19,8 @@ export type AuthScope =
   | "geospatial.read"
   | "agent.orchestrate"
   | "redteam.engage"
+  | "bounty.scan"
+  | "bounty.restore"
   | "darkweb.authorized"; // requires explicit operator attestation + legal token
 
 export interface AuthorizationContext {
@@ -195,6 +197,8 @@ export function demoOperator(overrides: Partial<AuthorizationContext> = {}): Aut
       "geospatial.read",
       "agent.orchestrate",
       "redteam.engage",
+      "bounty.scan",
+      "bounty.restore",
     ],
     engagementId: "DEMO-LAB-001",
     legalBasis: "Local authorized lab / demonstration only",
