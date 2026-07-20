@@ -178,7 +178,7 @@ Copy `.env.example` → `.env.local` as needed:
 
 ## Name
 
-**HelixaraAI** (*Helix* + *Ara* + *AI*) — intertwined intel streams converging at a sovereign command altar. Product name is always **HelixaraAI** (not Lumora / Aegis / Nexus).
+**HelixaraAI** (*Helix* + *Ara* + *AI*) — intertwined intel streams converging at a sovereign command altar. Product name is always **HelixaraAI**.
 
 ---
 
